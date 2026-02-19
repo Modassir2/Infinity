@@ -1,0 +1,6 @@
+ollama
+psutil
+requests
+wikipedia
+matplotlib
+Pillow

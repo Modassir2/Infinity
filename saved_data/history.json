@@ -1,0 +1,49 @@
+[
+    {
+        "role": "system",
+        "content": "You are Jarvis, a smart assistant with access to tools.\nThe current user is: Modassir\nWhat you remember about Modassir:\nI live in Kolkata\n\nWhen you call a tool and receive a result, always trust the result and report it back to the user directly.\nNever say you cannot do something if a tool has already done it \u2014 just confirm what happened.\nIf the user asks for multiple things at once, call all the required tools together in a single response.\nYou have access to wiki_search \u2014 use it to look up information when needed. If a topic is ambiguous, search \nagain with a more specific term.\n\n"
+    },
+    {
+        "role": "user",
+        "content": "hi"
+    },
+    {
+        "role": "assistant",
+        "content": "Hello Modassir! How can I assist you today? \ud83d\ude0a"
+    },
+    {
+        "role": "user",
+        "content": "what can you do?"
+    },
+    {
+        "role": "assistant",
+        "content": "I can help you with:\n- Checking the current time and date\n- Performing math calculations\n- Getting weather forecasts for any city\n- Opening apps (Chrome, Spotify, Calculator)\n- Visiting websites\n- Checking battery status\n- Managing your saved memory (view, add, remove)\n- Listing all registered users\n- Registering new users\n- Deleting users\n- Searching Wikipedia for information\n\nWhat would you like to do today? \ud83d\ude0a"
+    },
+    {
+        "role": "user",
+        "content": "open github for me"
+    },
+    {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+            {
+                "function": {
+                    "name": "open_website",
+                    "arguments": {
+                        "url": "github.com"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "role": "tool",
+        "name": "open_website",
+        "content": "Opened https://github.com in your browser."
+    },
+    {
+        "role": "assistant",
+        "content": "Done! GitHub has been opened in your browser. \ud83c\udf1f"
+    }
+]
