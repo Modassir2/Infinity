@@ -4,15 +4,15 @@ import ai_tools.functions as functions
 import os
 import json
 import time
-from gui.jarvis_gui import JarvisGUI
-from ai_tools.jarvis_tools import TOOLS , TOOL_MAP
+from gui.infinity_gui import InfinityGUI
+from ai_tools.infinity_tools import TOOLS , TOOL_MAP
 
 client=Client(host='http://localhost:11434')
 
 def select_user():
     db = functions._load_memory_db()
     print("\n" + "="*40)
-    print("       JARVIS — USER LOGIN")
+    print("       INFINITY — USER LOGIN")
     print("="*40)
 
     if db:
@@ -48,10 +48,8 @@ functions.current_user = logged_in_user
 
 user_memory = functions.view_memory()
 
-#history = utils.load_history()
 
-
-SYSTEM_PROMPT = f"""You are Jarvis, a smart assistant with access to tools.
+SYSTEM_PROMPT = f"""You are Infinity, a smart assistant with access to tools.
 The current user is: {logged_in_user}
 What you remember about {logged_in_user}:
 {user_memory}
@@ -78,7 +76,7 @@ def chat(message, gui=None):
 
     while True:
         response = client.chat(
-            model=gui.get_model() if gui else "qwen3:4b",
+            model="qwen3:4b",
             messages=history,
             keep_alive=-1,
             tools=TOOLS,
@@ -137,13 +135,13 @@ def chat(message, gui=None):
             break
 
     history.append({'role': 'assistant', 'content': reply})
-    print(f"Jarvis: {reply}\n")    
+    print(f"Infinity: {reply}\n")    
 
     history = utils.turnacate_history(history)
     utils.save_history(history)
     return reply, tool_summary
 
-def handle_message(user_msg: str, gui: JarvisGUI):
+def handle_message(user_msg: str, gui: InfinityGUI):
     try:
         gui.set_state("processing")
         reply, tool_summary = chat(user_msg, gui)
@@ -187,16 +185,16 @@ def on_clear():
     utils.save_history(history)
     gui.log("History cleared.")
 
-print("Jarvis Online.\n")
+print("Infinity Online.\n")
 
-gui = JarvisGUI(
+gui = InfinityGUI(
     on_send  = handle_message,
     on_save  = on_save,
     on_load  = on_load,
     on_clear = on_clear,
 )
 
-gui.log(f"JARVIS online. Logged in as: {logged_in_user}") 
+gui.log(f"INFINITY online. Logged in as: {logged_in_user}") 
 
 if len(history) > 1:
     gui.reload_chat_display(history)

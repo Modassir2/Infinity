@@ -11,7 +11,7 @@ def load_history():
     if os.path.exists('./saved_data/history.json'):
         with open('history.json', 'r') as f:
             return json.load(f)
-    return [{'role': 'system', 'content': "You are Jarvis."}]
+    return [{'role': 'system', 'content': "You are Infinity."}]
 
 def turnacate_history(history):
     if len(history) > 31:                              

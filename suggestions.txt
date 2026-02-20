@@ -1,0 +1,8 @@
+- The system online text- become system offline when Ollama is not running - Not needed
+- pressing shift + enter should go to new line instead of sending message - Done
+- the load button loads only user messages not the assistant messages - Fixed
+- the clear button next to input text box clears the entire chat instead of only the text box - The clear above clears enitre chat , the bottom clear clears the text inside the text box now
+- make user bubble rounded and add some padding/margin, it will make the GUI better - We can only change color since tkinter does not support all that
+- don't make a bubble for ai response. See Ollama for eg, user message is in a bubble but ai response is directly in there - Ig let there be a bubble , it looks fine
+- Also why is there 3dots(...) in every assistant reply - Fixed
+- Dont forget to remove model selector - DONE
