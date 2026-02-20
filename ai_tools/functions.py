@@ -7,6 +7,7 @@ import psutil
 import threading    
 import requests
 import wikipedia
+from win11toast import toast
 
 MEMORY_FILE = "./saved_data/memory.json"
 
@@ -162,8 +163,24 @@ def wiki_search(query: str, sentences: int = 5):
         return f"No Wikipedia page found for '{query}'. Try a different search term."
     except Exception as e:
         return f"Wiki search error: {e}"
-    
+
+def notify(title: str, body: str='', duration: int=0, on_click: str=''):
+    if duration!=0:
+        threading.Timer(duration*60,lambda: toast(
+            title,
+            body,
+            scenario='reminder',
+            on_click=on_click
+        )).start()
+        return f"Reminder set for {duration}"
+    else:
+        toast(
+                    title,
+                    body,
+                    duration='long',
+                    on_click=on_click
+                )
+        return f"Notification sent for {title}"
     
 if __name__=="__main__":
-    weather('Kolkata')
-
+    print(wiki_search('Class 11',6))

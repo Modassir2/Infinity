@@ -81,7 +81,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_battery_status",
-            "description": "Get the current battery percentage and whether the device is charging",
+            "description": "Get the current battery percentage and Charging status",
             "parameters": {
                 "type": "object",
                 "properties": {}
@@ -100,7 +100,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "add_memory",
-            "description": "Add something to the current user's memory",
+            "description": "Add text to the current user's memory",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -114,7 +114,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "remove_memory",
-            "description": "Remove something from the current user's memory",
+            "description": "Remove text from the current user's memory",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -164,7 +164,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "wiki_search",
-            "description": "Search Wikipedia and get a summary of a topic. Use this to look up information, compare things, or research anything. If the result says the topic is ambiguous, search again with a more specific term.",
+            "description": "Search Wikipedia and get a summary on a topic. If the result says the topic is ambiguous, search again with a more specific term.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -178,6 +178,35 @@ TOOLS = [
                     }
                 },
                 "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "notify",
+            "description": "Send notification to user. Use 'duration' parameter to Shedule notification for future or set alarm",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Title to be shown in notification"
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "Body of the notification"
+                    },
+                    "duration": {
+                        "type": "integer",
+                        "description": "Duration *in minutes* after which the notification will be sent. Leave empty to send notification immediatly"
+                    },
+                    "on_click": {
+                        "type": "string",
+                        "description": "Link to open when clicked on notification"
+                    }
+                },
+                "required": ['title']
             }
         }
     }
@@ -196,7 +225,8 @@ TOOL_MAP = {
     "list_users": functions.list_users,
     "register_user": functions.register_user,
     "delete_user": functions.delete_user,
-    "wiki_search": functions.wiki_search
+    "wiki_search": functions.wiki_search,
+    "notify": functions.notify
 }
 
 if __name__=="__main__":
