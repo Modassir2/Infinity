@@ -1,5 +1,5 @@
-# Jarvis
-Basically we are gonna build Jarvis in irl with python, ollama and searxng to ensure everything is local.
+# Infinity
+Basically we are gonna build an AI Agent (like Jarvis) irl with python, ollama and searxng to ensure everything is local.
 # Future Plans
 - Many more cool af functions
 - Vision Base by integrating OpenCV and enabling camera , with some face detection.
