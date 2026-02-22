@@ -5,18 +5,98 @@
     },
     {
         "role": "user",
-        "content": "Hi"
+        "content": "hey send a joke to +91 94322 90375"
     },
     {
         "role": "assistant",
-        "content": "Hello! How can I assist you today? \ud83d\ude0a"
+        "content": "",
+        "tool_calls": [
+            {
+                "function": {
+                    "name": "send_whatsapp",
+                    "arguments": {
+                        "phone": "+919432290375",
+                        "message": "What do you call a fake noodle? An impasta!"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "role": "tool",
+        "name": "send_whatsapp",
+        "content": "Sending WhatsApp message to +919432290375... it will be delivered in a few seconds."
+    },
+    {
+        "role": "assistant",
+        "content": "The joke has been sent to +919432290375! \ud83d\ude04"
     },
     {
         "role": "user",
-        "content": "what can you do"
+        "content": "open my github repo"
     },
     {
         "role": "assistant",
-        "content": "I can help with:\n- Getting the current time\n- Calculating math expressions\n- Checking the weather in any city (e.g., Kolkata)\n- Opening apps like Chrome, Spotify, or Calculator\n- Browsing websites\n- Checking battery status\n- Viewing, adding, or removing saved memories\n- Managing users (list, register, delete)\n- Searching Wikipedia\n- Sending notifications\n\nWhat would you like to do today? \ud83d\ude0a"
+        "content": "",
+        "tool_calls": [
+            {
+                "function": {
+                    "name": "view_memory",
+                    "arguments": {}
+                }
+            }
+        ]
+    },
+    {
+        "role": "tool",
+        "name": "view_memory",
+        "content": "I live in Kolkata"
+    },
+    {
+        "role": "assistant",
+        "content": "I don't have access to your GitHub repository URL or username. Would you like to share the GitHub URL or username so I can help open it for you? \ud83d\ude0a"
+    },
+    {
+        "role": "user",
+        "content": "username is Modassir2 and repo name is Jarvis"
+    },
+    {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+            {
+                "function": {
+                    "name": "open_website",
+                    "arguments": {
+                        "url": "https://github.com/Modassir2/Jarvis"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "role": "tool",
+        "name": "open_website",
+        "content": "Opened https://github.com/Modassir2/Jarvis in your browser."
+    },
+    {
+        "role": "assistant",
+        "content": "Your GitHub repository **Jarvis** (https://github.com/Modassir2/Jarvis) has been opened in your browser! \ud83d\ude80"
+    },
+    {
+        "role": "user",
+        "content": "yep thanks"
+    },
+    {
+        "role": "assistant",
+        "content": "You're welcome! \ud83d\ude0a Let me know if you need anything else. Have a great day from Kolkata! \ud83c\udf06"
+    },
+    {
+        "role": "user",
+        "content": "tell me how do i rename my repo to Infinity from Jarvis and the link will also update right?"
+    },
+    {
+        "role": "assistant",
+        "content": "Yes! Here's how you can rename your GitHub repo **from \"Jarvis\" to \"Infinity\"** and get the updated link:\n\n1\ufe0f\u20e3 Go to [your GitHub profile](https://github.com/Modassir2)  \n2\ufe0f\u20e3 Click **Repositories** \u2192 Find your **Jarvis** repo  \n3\ufe0f\u20e3 Click the **Rename** button (or edit the repo name)  \n4\ufe0f\u20e3 Save the changes \u2192 The URL will instantly update to:  \n`https://github.com/Modassir2/Infinity`\n\n\u2705 **The link will update automatically** once you confirm the rename. No extra steps needed!  \n\nLet me know if you want help with anything else from Kolkata \ud83c\udf06! \ud83d\ude0a"
     }
 ]

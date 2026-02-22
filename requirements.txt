@@ -5,3 +5,4 @@ wikipedia
 matplotlib
 Pillow
 win11toast
+selenium

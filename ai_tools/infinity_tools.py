@@ -181,11 +181,32 @@ TOOLS = [
             }
         }
     },
+   {
+        "type": "function",
+        "function": {
+            "name": "open_later",
+            "description": "Silently open a URL in the browser after a delay with NO notification. Use ONLY when user says things like 'open X in Y minutes' with no mention of reminder or notification.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The URL to open"
+                    },
+                    "delay_minutes": {
+                        "type": "integer",
+                        "description": "How many minutes to wait before opening"
+                    }
+                },
+                "required": ["url", "delay_minutes"]
+            }
+        }
+    },
     {
         "type": "function",
         "function": {
             "name": "notify",
-            "description": "Send notification to user. Use 'duration' parameter to Shedule notification for future or set alarm",
+            "description": "Show a toast notification to the user. Use when user wants to be REMINDED of something. If on_click is a URL, clicking opens it. Use duration to schedule it in the future. Do NOT use this just to open a link silently — use open_later for that.",   
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -209,7 +230,53 @@ TOOLS = [
                 "required": ['title']
             }
         }
-    }
+    },
+     {
+        "type": "function",
+        "function": {
+            "name": "send_email",
+            "description": "Open Gmail in the browser with recipient, subject, and body pre-filled. Use this when the user wants to write or send an email. First ask the user for the recipient email if not given. Then draft a subject and body yourself based on the user's context. Then call this tool.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "to": {
+                        "type": "string",
+                        "description": "Recipient email address"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "description": "Email subject line — draft yourself based on context"
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "Full email body text — draft this yourself based on what the user wants to say"
+                    }
+                },
+                "required": ["to", "subject", "body"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "send_whatsapp",
+            "description": "Send a WhatsApp message to a phone number. Ask for the recipient's phone number (full international format) if not provided. ALWAYS draft the message yourself.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "description": "Recipient phone number in full international format, eg +919875380572"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "The text to send"
+                    }
+                },
+                "required": ["phone", "message"]
+            }
+        }
+    },
 ]
 
 TOOL_MAP = {
@@ -226,7 +293,10 @@ TOOL_MAP = {
     "register_user": functions.register_user,
     "delete_user": functions.delete_user,
     "wiki_search": functions.wiki_search,
-    "notify": functions.notify
+    "notify": functions.notify,
+    "open_later": functions.open_later,
+    "send_email": functions.send_email,
+    "send_whatsapp": functions.send_whatsapp,
 }
 
 if __name__=="__main__":

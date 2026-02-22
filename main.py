@@ -43,8 +43,19 @@ def select_user():
             print(f"User '{choice}' not found. Type 'new' to register or try again.")
 
 logged_in_user = select_user()
-
 functions.current_user = logged_in_user
+
+if not utils.get_wh_session():
+    print("\n" + "="*50)
+    print("  WHATSAPP NOT SET UP")
+    print("  Would you like to set up WhatsApp now?")
+    print("  (y = yes, n = skip for this session)")
+    print("="*50)
+    wh_choice = input("  >> ").strip().lower()
+    if wh_choice == 'y':
+        utils.setup_wh_session()
+    else:
+        print("  Skipping WhatsApp setup. You can set it up later by restarting Infinity.\n")
 
 user_memory = functions.view_memory()
 
