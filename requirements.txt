@@ -6,3 +6,4 @@ matplotlib
 Pillow
 win11toast
 selenium
+vobject

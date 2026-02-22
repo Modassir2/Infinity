@@ -2,6 +2,7 @@ import json
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import vobject
 
 os.chdir(os.path.dirname(__file__))
 
@@ -47,3 +48,49 @@ def setup_wh_session():
 
     driver.quit()
     print("WhatsApp session saved successfully!\n")
+
+def get_contacts():
+    try:
+        with open('./saved_data/contacts.json','r') as f:
+            contacts=json.load(f)
+        if len(contacts)==0:
+            return None
+        return contacts
+    except FileNotFoundError as e:
+        return None
+    
+
+def extract_vcf_contacts():
+    contacts = []
+    while True:
+        print("Enter your contacts path")
+        file_path=input("  >> ")
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                for vcard in vobject.readComponents(f.read()):
+                    if hasattr(vcard, 'fn'):
+                        name = vcard.fn.value 
+                    else:
+                        continue
+                    if hasattr(vcard, 'tel'):
+                        phones = [tel.value for tel in vcard.tel_list]
+                    else:
+                        phones= "Unknown"
+                    if hasattr(vcard, 'email'):
+                        emails = [email.value for email in vcard.email_list]
+                    else:
+                        emails="unknown"
+
+                    contacts.append({'name':name,'phones':phones,'emails':emails})
+            if len(contacts)==0:
+                return "Contacts are empty"
+
+            with open('./saved_data/contacts.json','w') as file:
+                json.dump(contacts,file,indent=4)
+            
+            print("Contacts loaded!")
+            return f"Contacts extracted from: {os.path.basename(file_path)}"
+        except Exception as e:
+            print(f"An error occured: {e}")
+            print("Try again!")
+            continue

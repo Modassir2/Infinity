@@ -260,7 +260,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "send_whatsapp",
-            "description": "Send a WhatsApp message to a phone number. Ask for the recipient's phone number (full international format) if not provided. ALWAYS draft the message yourself.",
+            "description": "Send a WhatsApp message to a phone number. Ask for the recipient's phone number (full international format) or country code if not provided. ALWAYS draft the message yourself.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -277,6 +277,23 @@ TOOLS = [
             }
         }
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_contacts",
+            "description": "Search contacts for phone number and email ID by name",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Enter the name search. Use keywords to maxmise results"
+                    }
+                },
+                "required": ["name"]
+            }
+        }
+    }
 ]
 
 TOOL_MAP = {
@@ -297,6 +314,7 @@ TOOL_MAP = {
     "open_later": functions.open_later,
     "send_email": functions.send_email,
     "send_whatsapp": functions.send_whatsapp,
+    "search_contacts": functions.search_contacts
 }
 
 if __name__=="__main__":

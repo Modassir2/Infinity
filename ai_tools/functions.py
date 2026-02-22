@@ -205,7 +205,7 @@ def send_email(to: str, subject: str, body: str):
 def send_whatsapp(phone: str, message: str):
     session = utils.get_wh_session()
     if not session:
-        return "WhatsApp is not set up. Please restart Infinity — it will prompt you to log in."
+        return "WhatsApp is not set up. Please ask user to setup infinity by restarting the UI"
 
     def _send():
         chrome_options = Options()
@@ -234,3 +234,14 @@ def send_whatsapp(phone: str, message: str):
 
     threading.Thread(target=_send).start()
     return f"Sending WhatsApp message to {phone}... it will be delivered in a few seconds."
+
+def search_contacts(name: str):
+    if not utils.get_contacts():
+        return "Contacts has not been setup, ask user to load contacts or provide phone no. directly"
+    contacts=utils.get_contacts()
+    results=[]
+    for i in contacts:
+        cont_name=i['name']
+        if name.lower() in cont_name.lower():
+            results.append(i)
+    return json.dumps(results,indent=4)

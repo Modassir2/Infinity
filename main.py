@@ -45,6 +45,19 @@ def select_user():
 logged_in_user = select_user()
 functions.current_user = logged_in_user
 
+if not utils.get_contacts():
+    print("\n" + "="*50)
+    print("Contacts not loaded")
+    print("Would you like to load contacts")
+    print("  (y = yes, n = skip for this session)")
+    print("="*50)
+    cont_choice = input("  >> ").strip().lower()
+    if cont_choice=='y':
+        print(utils.extract_vcf_contacts())
+        input("Press Enter to continue...")
+    else:
+        print("  Skipping Loading Contacts. You can set it up later by restarting Infinity.\n")
+
 if not utils.get_wh_session():
     print("\n" + "="*50)
     print("  WHATSAPP NOT SET UP")
