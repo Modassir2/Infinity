@@ -1,7 +1,7 @@
 # Infinity
 Basically, we are building an AI Agent (similar to Jarvis) in real life using Python, Ollama, and SearXNG so that everything runs locally.
 
-#Bugs
+# Bugs
   - When I tell it to read a specific chat, it reads the messages, but sometimes it does not recognize my messages properly. At times it detects them correctly, but other times it fails.
   - Unable to read some chats , and reads some
 
@@ -23,3 +23,4 @@ Basically, we are building an AI Agent (similar to Jarvis) in real life using Py
 - File Management (Delete/Move with permission) and PC Control (Volume, Brightness, Shutdown).
 - Use tunneling service to access script from public networks.
 - Add a way to access remotely from android app (Android Studio).
+
