@@ -7,3 +7,5 @@ Pillow
 win11toast
 selenium
 vobject
+edge-tts
+pygetwindow

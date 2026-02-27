@@ -6,8 +6,87 @@ import json
 import time
 from gui.infinity_gui import InfinityGUI
 from ai_tools.infinity_tools import TOOLS , TOOL_MAP
+import asyncio    
+import threading    
 
 client=Client(host='http://localhost:11434')
+#To get token count, remove the coments from below and run main.py
+#print(f"Tools count: {len(TOOL_MAP)}")
+#chrs=len(str(TOOLS))
+#print(f"Tokens count: {chrs/4}")
+#exit()
+
+import re as _re
+import tempfile                                                          
+import subprocess                                                           
+import sys                                                                  
+
+def _clean_for_tts(text: str) -> str:       
+    text = _re.sub(r'\*\*(.+?)\*\*', r'\1', text)  
+    text = _re.sub(r'\*(.+?)\*',     r'\1', text)  
+    text = _re.sub(r'#+\s*',         '',    text) 
+    text = _re.sub(r'`+',            '',    text)  
+    text = text.encode('utf-16', 'surrogatepass').decode('utf-16')
+    text = ''.join(ch for ch in text if ord(ch) <= 0xFFFF and not (0x2600 <= ord(ch) <= 0x27BF))
+    text = _re.sub(                                                        
+        u'[\U00010000-\U0010FFFF]', '', text                            
+    )                                                                      
+    text = _re.sub(r'\s+', ' ', text).strip()                          
+    return text                                                            
+
+def speak(text: str):
+    def _run():                                                             
+        try:                                                                
+            import edge_tts                                                 
+            clean = _clean_for_tts(text)                                   
+            if not clean:                                                   
+                return                                                      
+
+            loop = asyncio.new_event_loop()                                
+            asyncio.set_event_loop(loop)                                   
+
+            async def _generate(path):                                     
+                communicate = edge_tts.Communicate(                        
+                    clean,                                                  
+                    voice="en-IN-NeerjaNeural" 
+                )                                                           
+                await communicate.save(path)                               
+
+            tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) 
+            tmp_path = tmp.name                                             
+            tmp.close()                                                     
+
+            loop.run_until_complete(_generate(tmp_path))                   
+            loop.close()                                                    
+
+            size = os.path.getsize(tmp_path)                               
+            if size == 0:                                                   
+                return                                                      
+
+            if sys.platform == "win32":                                    
+
+                duration_sec = int(size / 3000) + 2                     
+                ps_cmd = (                                                  
+                    "Add-Type -AssemblyName presentationCore;"             
+                    "$p = New-Object System.Windows.Media.MediaPlayer;"    
+                    f"$p.Open([uri]'{tmp_path}');"                        
+                    "$p.Play();"                                           
+                    f"Start-Sleep -Seconds {duration_sec};"                
+                    "$p.Close()"                                           
+                )                                                           
+                subprocess.run(                                             
+                    ["powershell", "-WindowStyle", "Hidden", "-Command", ps_cmd],
+                    creationflags=0x08000000                                
+                )                                                           
+            else:                                                           
+                subprocess.run(["xdg-open", tmp_path])                     
+
+            os.remove(tmp_path)                                            
+
+        except Exception as e:                                              
+            print(f"[TTS Error] {e}")                                      
+
+    threading.Thread(target=_run, daemon=False).start()                    
 
 def select_user():
     db = functions._load_memory_db()
@@ -176,6 +255,9 @@ def handle_message(user_msg: str, gui: InfinityGUI):
             gui.append_stream_char(ch)
             time.sleep(0.008)
         gui.end_ai_bubble()
+
+        if gui.voice_enabled:
+            speak(reply)
 
         utils.save_history(history)
         gui.log("Done.")

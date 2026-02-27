@@ -233,6 +233,7 @@ class InfinityGUI:
         self.is_processing  = False
         self._image_refs    = []   
         self._ai_buf        = ""   
+        self.voice_enabled  = False 
 
         self.root = tk.Tk()
         self.root.title("INFINITY")
@@ -282,7 +283,7 @@ class InfinityGUI:
         body = tk.Frame(self.root, bg=BG)
         body.pack(fill="both", expand=True)
         self._build_left_panel(body)
-        tk.Frame(body, bg=BORDER, width=1).pack(side="left", fill="y")  # Divider
+        tk.Frame(body, bg=BORDER, width=1).pack(side="left", fill="y")  
         self._build_right_panel(body)
 
     def _build_topbar(self):
@@ -311,6 +312,9 @@ class InfinityGUI:
 
 
         self._mkbtn(ctrl, "CLEAR", self._on_clear, RED).pack(side="right", padx=4)
+
+        self._voice_btn = self._mkbtn(ctrl, "VOICE: OFF", self._on_toggle_voice, TEXT_DIM)
+        self._voice_btn.pack(side="right", padx=4)
 
 
 
@@ -563,6 +567,17 @@ class InfinityGUI:
     def _on_clear_input(self):
         self.entry.delete("1.0", "end")
         self._resize_entry()
+
+    def _on_toggle_voice(self):
+        self.voice_enabled = not self.voice_enabled
+        if self.voice_enabled:
+            self._voice_btn.config(text="VOICE: ON",  fg=ACCENT2,
+                                   highlightbackground=ACCENT2)
+            self.log("Voice enabled — Infinity will speak responses.")
+        else:
+            self._voice_btn.config(text="VOICE: OFF", fg=TEXT_DIM,
+                                   highlightbackground=TEXT_DIM)
+            self.log("Voice disabled.")
 
     def _on_exit(self):
         self.root.destroy()
