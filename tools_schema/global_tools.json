@@ -13,13 +13,27 @@
     {
         "type":"function",
         "function":{
+            "name":"get_weather",
+            "description":"Get weather details by city name.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "city":{"type":"string","description":"The city to get weather details for."}
+                },
+                "required":["city"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
             "name":"wiki_search",
             "description":"Search wikipedia for facts and information.",
             "parameters":{
                 "type":"object",
                 "properties":{
                     "query":{"type":"string","description":"Search Keyword."},
-                    "offset":{"type":"integer","description":"'Number of Characters to return in full content."}
+                    "offset":{"type":"integer","description":"'Number of Characters to return in full content.","default":4000}
                 },
                 "required":["query"]
             }

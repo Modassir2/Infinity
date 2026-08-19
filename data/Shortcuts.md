@@ -1,4 +1,6 @@
-# MODULE 1: GOOGLE CHROME (WINDOWS/LINUX) COMPLETE REGISTRY [1, 3, 4] ## 1. Window & Tab Management
+# MODULE 1: GOOGLE CHROME (WINDOWS/LINUX) COMPLETE REGISTRY [1, 3, 4] 
+
+## 1. Window & Tab Management
 
 * Ctrl + N: Open a new window.
 * Ctrl + Shift + N: Open a new window in Incognito mode.
@@ -12,7 +14,7 @@
 * Ctrl + 9: Switch to the rightmost tab regardless of total count.
 * Alt + Home: Open your home page in the current tab.
 * Alt + Left Arrow: Open the previous page from browsing history in the current tab.
-* Alt + Right Arrow: Open the next page from browsing history in the current tab. [2, 5, 6, 7, 8] 
+* Alt + Right Arrow: Open the next page from browsing history in the current tab.
 
 ## 2. Google Chrome Feature & Management Hotkeys
 
@@ -26,16 +28,16 @@
 * F12 (or Ctrl + Shift + I): Launch Chrome Developer Tools.
 * Ctrl + Shift + J: Open the Developer Tools Console panel directly.
 * Ctrl + Shift + C: Open Developer Tools in element-inspection mode.
-* Ctrl + Shift + M: Switch between the current profile and another user account. [2, 5, 6, 9] 
+* Ctrl + Shift + M: Switch between the current profile and another user account. 
 
 ## 3. Address Bar / Omnibox Management
 
 * Ctrl + L (or Alt + D or F6): Move keyboard focus directly to the address bar.
 * Ctrl + E (or Ctrl + K): Type a search query directly using your default search engine.
 * Ctrl + Enter: Append www. to the beginning and .com to the end of your address bar input text.
-* Alt + Enter: Execute the URL or search query from the address bar inside a new background tab. [2, 5, 10] 
+* Alt + Enter: Execute the URL or search query from the address bar inside a new background tab.
 
-## 4. Webpage Interaction & Manipulation [11] 
+## 4. Webpage Interaction & Manipulation
 
 * Ctrl + P: Launch the system Print dialog box for the current page.
 * Ctrl + S: Launch the "Save Page As" prompt to download the current webpage files.
@@ -55,7 +57,7 @@
 * Spacebar (or Page Down): Scroll down the current webpage by one full screen view.
 * Shift + Spacebar (or Page Up): Scroll up the current webpage by one full screen view.
 * Home: Jump focus directly to the very top edge of the current webpage.
-* End: Jump focus directly to the very bottom edge of the current webpage. [2, 4, 5, 6, 12, 13] 
+* End: Jump focus directly to the very bottom edge of the current webpage.
 
 ------------------------------
 # MODULE 2: WHATSAPP WEB COMPLETE REGISTRY
@@ -68,7 +70,7 @@
 * Ctrl + Alt + Tab: Jump focus loop directly to the primary left-hand application menu bar.
 * Ctrl + Alt + [ (or Ctrl + Shift + [): Navigate up to the immediately preceding conversation in your list.
 * Ctrl + Alt + ] (or Ctrl + Shift + ]): Navigate down to the immediately following conversation in your list.
-* Esc: Terminate focus from the search bar, or close the currently displayed active conversation thread. [6, 14, 15] 
+* Esc: Terminate focus from the search bar, or close the currently displayed active conversation thread.
 
 ## 2. Conversation & Thread Controls
 
@@ -76,7 +78,7 @@
 * Ctrl + Alt + Shift + M: Toggle notification mute settings on or off for the selected chat.
 * Ctrl + Alt + Shift + P: Securely pin or unpin the selected chat thread to the top of your list.
 * Ctrl + Alt + Shift + E: Move the designated active chat thread into your Archive folder.
-* Ctrl + Alt + Backspace: Execute a complete deletion of the selected active conversation thread. [7, 14] 
+* Ctrl + Alt + Backspace: Execute a complete deletion of the selected active conversation thread. 
 
 ## 3. Active Chat Window Messaging Tools
 
@@ -88,7 +90,7 @@
 * Ctrl + Alt + E: Summon the application's built-in emoji selection tray menu.
 * Ctrl + Alt + G: Summon the application's built-in animated GIF file selection menu.
 * Ctrl + Alt + S: Summon the application's built-in sticker asset selection panel.
-* Shift + Enter: Inject a standard vertical line break into your current text input block without sending. [4, 6, 12, 14] 
+* Shift + Enter: Inject a standard vertical line break into your current text input block without sending.
 
 ------------------------------
 ## MODULE 3: WINDOWS 11 CORE OPERATING SYSTEM REGISTRY [12] ## 1. System-Level UI Shortcuts (The Windows Key Ecosystem)
@@ -133,7 +135,7 @@
 * Win + Esc: Close the active Magnifier tool application.
 * Win + PrtScn: Capture a full-screen image and save it directly to the Pictures\Screenshots directory.
 * Win + Shift + S: Open the advanced Snipping Tool rectangular, freeform, or window screenshot box.
-* Win + Ctrl + Shift + B: Instantly restart your physical graphics driver pipeline (clears black screens). [1, 6, 16, 17, 18] 
+* Win + Ctrl + Shift + B: Instantly restart your physical graphics driver pipeline (clears black screens).
 
 ## 2. Advanced Window Snapping & Desktop Workspace Management
 
@@ -149,7 +151,7 @@
 * Win + Tab: Open the Task View navigation pane to view active apps and virtual workspaces.
 * Win + Ctrl + Arrow Left: Slide view focus over onto the adjacent left virtual workspace Desktop.
 * Win + Ctrl + Arrow Right: Slide view focus over onto the adjacent right virtual workspace Desktop.
-* Win + Ctrl + F4: Force close the specific virtual workspace Desktop you are currently working within. [17, 18] 
+* Win + Ctrl + F4: Force close the specific virtual workspace Desktop you are currently working within.
 
 ## 3. General Win32 Application Workspace Controls
 
@@ -167,7 +169,7 @@
 * F10: Activate the Menu Bar options layer inside standard legacy Win32 software.
 * F11: Toggle the focused window into a borderless full-screen view state.
 * Shift + Delete: Permanently erase a highlighted file, bypassing the Recycle Bin storage completely.
-* Shift + F10: Launch the traditional standard right-click context menu options layer for a selected item. [6, 11, 15, 16, 18, 19] 
+* Shift + F10: Launch the traditional standard right-click context menu options layer for a selected item.
 
 ## 4. Text Editing System Engine Focus
 
@@ -186,4 +188,4 @@
 * Ctrl + Backspace: Delete the entire complete word situated directly to the left of the typing cursor.
 * Ctrl + Delete: Delete the entire complete word situated directly to the right of the typing cursor.
 * Ctrl + Home: Instantly snap the typing cursor back to the start of the document container.
-* Ctrl + End: Instantly snap the typing cursor forward to the end of the document container. [6, 12, 15, 16]
+* Ctrl + End: Instantly snap the typing cursor forward to the end of the document container.

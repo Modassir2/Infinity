@@ -64,7 +64,7 @@ class Config:
         self.mon = int(config.get("primary_monitor",1))
         self.image_n = int(config.get("keep_images",999))
 
-config = Config()
+
 
 class Agent:
     def __init__(self):
@@ -72,7 +72,7 @@ class Agent:
         self.tools = utils.load_schema("global_tools.json")
         self.tool_map = {}
 
-agent = Agent()
+
 
 class History:
     def __init__(self):
@@ -92,10 +92,10 @@ class History:
         return console.print(f"Token count: {self.tokens}/{ctx_token}; {(self.tokens/ctx_token)*100:.2f}%", style="yellow")
     def clear_history(self,console:Console):
         old_mem = utils.load_memory() if utils.load_memory() else "None"
-        chat = ''
+        chat_log = ""
         for i in self.history:
             if i["role"] == "user":
-                chat += "\n[user:]\n"
+                chat_log += "\n[user:]\n"
                 if type(i["content"]) == list:
                     content = ""
                     for j in i["content"]:
@@ -104,12 +104,12 @@ class History:
                     content = content.strip()
                 else:
                     content = i["content"]
-                chat += content
+                chat_log += content
             elif i["role"] == "assistant" and i["content"] != None:
-                chat += "\n[agent:]\n"
-                chat += i["content"]
+                chat_log += "\n[agent:]\n"
+                chat_log += i["content"]
             elif i["role"] == "tool":
-                chat += "\n[tool:]\n"
+                chat_log += "\n[tool:]\n"
                 if type(i["content"]) == list:
                     content = ""
                     for j in i["content"]:
@@ -118,12 +118,12 @@ class History:
                     content = content.strip()
                 else:
                     content = i["content"]
-                chat += content
+                chat_log += content
             else:
                 continue
         message = [
             {"role":"system","content":compression_prompt},
-            {"role":"user","content":f"Old Profile:\n {old_mem}\n\n Chat Log:\n{chat}"}
+            {"role":"user","content":f"Old Profile:\n {old_mem}\n\n Chat Log:\n{chat_log}"}
         ]
         console.print("Trucating History...",style="yellow",end="\r")
         response = config.client.chat.completions.create(
@@ -149,6 +149,8 @@ class History:
         n = config.image_n
         imgs=0;img_index_list=[];x=0
         for i in history:
+            if i["role"] in ("user","system","assistant"):
+                continue
             msg=i['content']
             if type(msg)==list:
                 for j in msg:
@@ -185,6 +187,9 @@ class History:
             #console.file.write("\r\x1b[K")
             live.update("",refresh=True)
 
+
+config = Config()
+agent = Agent()
 history = History()
 
 if __name__ == "__main__":

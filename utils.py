@@ -2,9 +2,11 @@ import json
 import time
 import requests
 from datetime import datetime
+import base64
+from typing import Literal
 
 system_prompt = """# Role and Core Objective
-You are infinity, the Main Orchestrator Agent. Your job is to analyze the user's request and answer directly in most cases. Delegate the task to the single most qualified sub-agent if required.
+You are Infinity, the `main_agent`. Your job is to analyze the user's request and answer directly in most cases. Delegate the task to the single most qualified sub-agent if required.
 
 # Agent Routing & Delegation Framework
 You operate under a strict "Capability-to-Task Match" protocol. You are strictly forbidden from routing a task to any sub-agent whose explicitly declared capabilities do not cover the core intent of that task.
@@ -47,32 +49,35 @@ def load_schema(name:str):
     file.close()
     return schema
 
+def get_base64_url(path:str):
+    with open(path,'rb') as f:
+        b64 = base64.b64encode(f.read()).decode('utf-8')
+    return f"data:image/png;base64,{b64}"
 
-def log(line:str,path:str=r'.\data\logs.txt'):
-    current_date = time.strftime(r"%Y-%m-%d")
-    current_time = time.strftime(r"%H:%M:%S")
+def log(line:str,path:str=r'.\data\logs.txt',level:Literal["DEBUG","INFO","WARN","ERROR","FATAL"]="INFO"):
+    d = {
+        "timestamp": get_datetime(),
+        "level": level,
+        "details":line
+    }
     with open(path,'a') as file:
-        file.write(f"[{current_date}][{current_time}]: {line}\n")
+        file.write(json.dumps(d)+'\n')
 
 def save_history(history:list):
-    try:
-        with open(r'.\data\history.json','w') as f:
-            json.dump(history,f,indent=4)
-        return True
-    except IOError as e:
-        print(e)
-        return False
+    #log("History Saved utils.txt save_history() line 63",path=r".\data\debug.txt",level="DEBUG")
+    with open(r'.\data\history.json','w') as f:
+        json.dump(history,f,indent=4)
     
 def load_history():
     try:
         with open(r".\data\history.json",'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        return [{"role":"system","content":system_prompt+'\n\n'+load_memory()}]
+        return [{"role":"system","content":system_prompt}]
     
 def load_memory():
     try:
-        with open(r'.\data\memory.txt','r') as file:
+        with open(r'.\data\memory.md','r') as file:
             return file.read()
     except FileNotFoundError:
         return None
