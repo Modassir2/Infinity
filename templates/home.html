@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Infinity Chat</title>
+        <style>
+            :root {
+                --bg: #050b14;
+                --panel: rgba(12, 20, 31, 0.92);
+                --panel-edge: rgba(102, 255, 170, 0.35);
+                --text: #e6edf3;
+                --muted: #8ea4b8;
+                --accent: #6ee7b7;
+                --accent-strong: #2ee59d;
+                --danger: #ff4d5a;
+                --shadow: rgba(0, 0, 0, 0.5);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                height: 100%;
+                font-family: "Consolas", "SFMono-Regular", "Menlo", monospace;
+                background:
+                    radial-gradient(circle at top, rgba(19, 42, 60, 0.8), transparent 40%),
+                    linear-gradient(180deg, #030812 0%, var(--bg) 100%);
+                color: var(--text);
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                padding: 24px;
+            }
+
+            .terminal-shell {
+                width: min(100%, 900px);
+                height: 80vh;
+                max-height: 700px;
+                background: rgba(8, 14, 22, 0.88);
+                border: 1px solid var(--panel-edge);
+                border-radius: 14px;
+                box-shadow: 0 0 0 1px rgba(122, 145, 163, 0.18), 0 18px 48px var(--shadow);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .terminal-bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 16px;
+                background: rgba(255, 255, 255, 0.03);
+                border-bottom: 1px solid rgba(110, 231, 183, 0.2);
+                flex-shrink: 0;
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                display: inline-block;
+            }
+
+            .dot.red { background: #ff5f57; }
+            .dot.yellow { background: #ffbd2e; }
+            .dot.green { background: #28c840; }
+
+            .terminal-title {
+                margin-left: 8px;
+                font-size: 0.75rem;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .chat-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .chat-history {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .chat-history::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .chat-history::-webkit-scrollbar-track {
+                background: rgba(15, 23, 31, 0.4);
+                border-radius: 4px;
+            }
+
+            .chat-history::-webkit-scrollbar-thumb {
+                background: rgba(110, 231, 183, 0.3);
+                border-radius: 4px;
+            }
+
+            .chat-history::-webkit-scrollbar-thumb:hover {
+                background: rgba(110, 231, 183, 0.5);
+            }
+
+            .message {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .message.user {
+                justify-content: flex-end;
+            }
+
+            .message.system {
+                justify-content: center;
+            }
+
+            .message-prefix {
+                color: var(--accent);
+                flex-shrink: 0;
+                font-size: 0.9rem;
+                font-weight: bold;
+            }
+
+            .message-content {
+                background: rgba(15, 23, 31, 0.6);
+                border: 1px solid rgba(110, 231, 183, 0.2);
+                border-radius: 8px;
+                padding: 12px 14px;
+                max-width: 70%;
+                word-wrap: break-word;
+                white-space: pre-wrap;
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+
+            .message.user .message-content {
+                background: rgba(46, 229, 157, 0.12);
+                border-color: rgba(110, 231, 183, 0.3);
+                color: var(--accent);
+            }
+
+            .message.assistant .message-content {
+                background: rgba(15, 23, 31, 0.8);
+                border-color: rgba(110, 231, 183, 0.2);
+                color: var(--text);
+            }
+
+            .empty-state {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                flex-direction: column;
+                gap: 12px;
+                color: var(--muted);
+                text-align: center;
+            }
+
+            .empty-state h2 {
+                margin: 0;
+                font-size: 1.2rem;
+                color: var(--accent);
+                text-shadow: 0 0 10px rgba(110, 231, 183, 0.35);
+                letter-spacing: 0.1em;
+            }
+
+            .input-section {
+                border-top: 1px solid rgba(110, 231, 183, 0.2);
+                padding: 16px 24px;
+                background: rgba(8, 14, 22, 0.95);
+                flex-shrink: 0;
+            }
+
+            .input-row {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .prompt-prefix {
+                color: var(--accent);
+                font-size: 0.9rem;
+                font-weight: bold;
+                flex-shrink: 0;
+            }
+
+            input[type="text"] {
+                flex: 1;
+                background: rgba(15, 23, 31, 0.95);
+                border: 1px solid rgba(110, 231, 183, 0.25);
+                border-radius: 8px;
+                padding: 12px 14px;
+                color: var(--text);
+                font-size: 0.95rem;
+                font-family: inherit;
+                outline: none;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            input[type="text"]:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.14);
+            }
+
+            input[type="text"]::placeholder {
+                color: rgba(142, 164, 184, 0.7);
+            }
+
+            button {
+                border: 1px solid rgba(110, 231, 183, 0.45);
+                background: linear-gradient(180deg, rgba(18, 34, 29, 0.9), rgba(10, 22, 18, 0.9));
+                color: var(--accent-strong);
+                padding: 10px 18px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 0.85rem;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                font-weight: bold;
+                transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+                box-shadow: 0 0 18px rgba(46, 229, 157, 0.12);
+                flex-shrink: 0;
+            }
+
+            button:hover {
+                transform: translateY(-1px);
+                border-color: rgba(110, 231, 183, 0.8);
+                box-shadow: 0 0 22px rgba(46, 229, 157, 0.16);
+            }
+
+            button:active {
+                transform: translateY(0);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="terminal-shell">
+            <div class="terminal-bar" aria-hidden="true">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="terminal-title">infinity@terminal ~/chat</span>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-history" id="chatHistory">
+                    {% if response %}
+                        <div class="message assistant">
+                            <span class="message-prefix">→</span>
+                            <div class="message-content">{{ response }}</div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <h2>INFINITY</h2>
+                            <p>Ready for your input...</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="input-section">
+                    <form action="/home" method="POST" id="chatForm">
+                        <div class="input-row">
+                            <span class="prompt-prefix">$</span>
+                            <input 
+                                type="text" 
+                                name="prompt" 
+                                id="prompt" 
+                                placeholder="Enter a message..." 
+                                autocomplete="off"
+                                autofocus
+                            />
+                            <button type="submit">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Auto-scroll to bottom when page loads
+            const chatHistory = document.getElementById('chatHistory');
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            // Clear input after submit
+            const chatForm = document.getElementById('chatForm');
+            if (chatForm) {
+                chatForm.addEventListener('submit', function() {
+                    // The form will submit and reload, so this just ensures smooth behavior
+                });
+            }
+        </script>
+    </body>
+</html>

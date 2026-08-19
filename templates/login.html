@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Login</title>
+        <style>
+            :root {
+                --bg: #050b14;
+                --panel: rgba(12, 20, 31, 0.92);
+                --panel-edge: rgba(102, 255, 170, 0.35);
+                --text: #e6edf3;
+                --muted: #8ea4b8;
+                --accent: #6ee7b7;
+                --accent-strong: #2ee59d;
+                --danger: #ff4d5a;
+                --shadow: rgba(0, 0, 0, 0.5);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                height: 100%;
+                font-family: "Consolas", "SFMono-Regular", "Menlo", monospace;
+                background:
+                    radial-gradient(circle at top, rgba(19, 42, 60, 0.8), transparent 40%),
+                    linear-gradient(180deg, #030812 0%, var(--bg) 100%);
+                color: var(--text);
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                padding: 24px;
+            }
+
+            .terminal-shell {
+                width: min(100%, 440px);
+                background: rgba(8, 14, 22, 0.88);
+                border: 1px solid var(--panel-edge);
+                border-radius: 14px;
+                box-shadow: 0 0 0 1px rgba(122, 145, 163, 0.18), 0 18px 48px var(--shadow);
+                overflow: hidden;
+            }
+
+            .terminal-bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 16px;
+                background: rgba(255, 255, 255, 0.03);
+                border-bottom: 1px solid rgba(110, 231, 183, 0.2);
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                display: inline-block;
+            }
+
+            .dot.red { background: #ff5f57; }
+            .dot.yellow { background: #ffbd2e; }
+            .dot.green { background: #28c840; }
+
+            .terminal-body {
+                padding: 28px 26px 22px;
+            }
+
+            .brand {
+                margin: 0 0 18px;
+                font-size: clamp(1.5rem, 3vw, 2rem);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--accent);
+                text-shadow: 0 0 10px rgba(110, 231, 183, 0.35);
+            }
+
+            form {
+                display: flex;
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .label-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.72rem;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .prompt {
+                color: var(--accent);
+            }
+
+            input[type="password"] {
+                width: 100%;
+                background: rgba(15, 23, 31, 0.95);
+                border: 1px solid rgba(110, 231, 183, 0.25);
+                border-radius: 10px;
+                padding: 14px 14px;
+                color: var(--text);
+                font-size: 1rem;
+                outline: none;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            input[type="password"]:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.14);
+            }
+
+            input[type="password"]::placeholder {
+                color: rgba(142, 164, 184, 0.7);
+            }
+
+            button {
+                border: 1px solid rgba(110, 231, 183, 0.45);
+                background: linear-gradient(180deg, rgba(18, 34, 29, 0.9), rgba(10, 22, 18, 0.9));
+                color: var(--accent-strong);
+                padding: 12px 16px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 0.9rem;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+                box-shadow: 0 0 18px rgba(46, 229, 157, 0.12);
+            }
+
+            button:hover {
+                transform: translateY(-1px);
+                border-color: rgba(110, 231, 183, 0.8);
+                box-shadow: 0 0 22px rgba(46, 229, 157, 0.16);
+            }
+
+            .message {
+                min-height: 24px;
+                margin: 0;
+                font-size: 0.85rem;
+                letter-spacing: 0.06em;
+                color: var(--danger);
+                text-shadow: 0 0 8px rgba(255, 77, 90, 0.38);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="terminal-shell">
+            <div class="terminal-bar" aria-hidden="true">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+            </div>
+
+            <div class="terminal-body">
+                <form action="/login" method="POST">
+                    <h1 class="brand">Welcome Modassir</h1>
+
+                    <div class="label-row">
+                        <span>Access</span>
+                        <span class="prompt">$Infinity</span>
+                    </div>
+
+                    <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" />
+
+                    <button type="submit">Unlock</button>
+
+                    {% if msg %}
+                        <p class="message">{{ msg }}</p>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

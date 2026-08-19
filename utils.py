@@ -1,96 +1,123 @@
 import json
-import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import vobject
+import time
+import requests
+from datetime import datetime
 
-os.chdir(os.path.dirname(__file__))
+system_prompt = """# Role and Core Objective
+You are infinity, the Main Orchestrator Agent. Your job is to analyze the user's request and answer directly in most cases. Delegate the task to the single most qualified sub-agent if required.
 
-WH_SESSION_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saved_data", "wh_session")
+# Agent Routing & Delegation Framework
+You operate under a strict "Capability-to-Task Match" protocol. You are strictly forbidden from routing a task to any sub-agent whose explicitly declared capabilities do not cover the core intent of that task.
 
-def save_history(history):
-    with open('./saved_data/history.json', 'w') as f:
-        json.dump(history, f, indent=4)
+## Core Routing Principles
 
-def load_history():
-    if os.path.exists('./saved_data/history.json'):
-        with open('history.json', 'r') as f:
-            return json.load(f)
-    return [{'role': 'system', 'content': "You are Infinity."}]
+1. Core Intent Extraction
+   - Before choosing a sub-agent, extract the primary verb and domain of the user's request (e.g., calculation, file manipulation, web search).
 
-def turnacate_history(history):
-    if len(history) > 31:                              
-        return [history[0]] + history[-30:]            
-    return history
+2. Strict Positive Matching
+   - Match the extracted domain ONLY to sub-agents that explicitly list that capability in their profile.
+   - If a capability is not explicitly listed for a sub-agent, assume that sub-agent is completely incapable of performing it.
 
-def get_wh_session():
-    if os.path.exists(WH_SESSION_PATH) and os.listdir(WH_SESSION_PATH):
-        return WH_SESSION_PATH
-    return None
+3. Task completion
+   - Complete the task directly by yourself when no specialized subagent is available for the task.
+   - Directly complete short tasks on your own when possible instead of calling subagent.
 
-def setup_wh_session():
+4. Multi-Step Decomposition
+   - If a request requires multiple domains (e.g., "Calculate X and write it to a file"), you must break it down. 
+   - Delegate the domain-specific logic (calculation) to the appropriate specialist or do it yourself, then pass the output to the operational specialist (file writing).
 
-    os.makedirs(WH_SESSION_PATH, exist_ok=True)
+5. Complete Domain Isolation (Zero Cross-Over)
+   - Do not assume an agent can perform a task simply because it has a general-purpose operating environment.
+   - Example: A system/OS-level agent must never be used for content generation, calculation, or logic tasks unless explicitly stated, even if it has access to tools that could theoretically run those tasks.
+"""
+buffer_tokens = 1000
 
-    chrome_options = Options()
-    chrome_options.add_argument(f"--user-data-dir={WH_SESSION_PATH}")
-    chrome_options.add_argument("--profile-directory=Default")
-    chrome_options.add_argument("--window-size=1200,800")
+def load_config(path:str=r".\config.json"):
+    file = open(path,'r')
+    config = json.load(file)
+    file.close()
+    return config
 
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get("https://web.whatsapp.com")
+def load_schema(name:str):
+    if not name.endswith(".json"):
+        name+=".json"
+    path = r".\\tools_schema\\" + name
+    file = open(path,'r')
+    schema = json.load(file)
+    file.close()
+    return schema
 
-    print("\n" + "="*50)
-    print("  WHATSAPP SETUP — Scan the QR code in Chrome.")
-    print("  Once your chats are visible, come back here.")
-    print("="*50)
-    input("  Press Enter once you are logged in... ")
 
-    driver.quit()
-    print("WhatsApp session saved successfully!\n")
+def log(line:str,path:str=r'.\data\logs.txt'):
+    current_date = time.strftime(r"%Y-%m-%d")
+    current_time = time.strftime(r"%H:%M:%S")
+    with open(path,'a') as file:
+        file.write(f"[{current_date}][{current_time}]: {line}\n")
 
-def get_contacts():
+def save_history(history:list):
     try:
-        with open('./saved_data/contacts.json','r') as f:
-            contacts=json.load(f)
-        if len(contacts)==0:
-            return None
-        return contacts
-    except FileNotFoundError as e:
-        return None
+        with open(r'.\data\history.json','w') as f:
+            json.dump(history,f,indent=4)
+        return True
+    except IOError as e:
+        print(e)
+        return False
     
+def load_history():
+    try:
+        with open(r".\data\history.json",'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return [{"role":"system","content":system_prompt+'\n\n'+load_memory()}]
+    
+def load_memory():
+    try:
+        with open(r'.\data\memory.txt','r') as file:
+            return file.read()
+    except FileNotFoundError:
+        return None
 
-def extract_vcf_contacts():
-    contacts = []
-    while True:
-        print("Enter your contacts path")
-        file_path=input("  >> ")
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                for vcard in vobject.readComponents(f.read()):
-                    if hasattr(vcard, 'fn'):
-                        name = vcard.fn.value 
-                    else:
-                        continue
-                    if hasattr(vcard, 'tel'):
-                        phones = [tel.value for tel in vcard.tel_list]
-                    else:
-                        phones= "Unknown"
-                    if hasattr(vcard, 'email'):
-                        emails = [email.value for email in vcard.email_list]
-                    else:
-                        emails="unknown"
+def get_datetime():
+    now = datetime.now()
+    dt = now.strftime(r"%A, %d-%B-%Y, %I:%M %p")
+    return dt
 
-                    contacts.append({'name':name,'phones':phones,'emails':emails})
-            if len(contacts)==0:
-                return "Contacts are empty"
+def count_tokens(messages: list[dict],model,url,api_key, tools = None) -> int:
+    history = messages.copy()
+    if len(history)<=1:
+        history.append({"role":"user","content":"Hello"})
+    headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+    }
+    payload = {
+    "model": model,
+    "messages": history
+    }
+    if tools:
+        payload["tools"] = tools
 
-            with open('./saved_data/contacts.json','w') as file:
-                json.dump(contacts,file,indent=4)
-            
-            print("Contacts loaded!")
-            return f"Contacts extracted from: {os.path.basename(file_path)}"
-        except Exception as e:
-            print(f"An error occured: {e}")
-            print("Try again!")
+    for i in range(3):
+        response = requests.post(
+            f"{url}/v1/chat/completions/input_tokens",
+            json=payload,
+            headers=headers,
+            timeout=300,
+        )
+        if response.status_code==500:
             continue
+        break
+    #print("STATUS:", response.status_code)
+    #print("RESPONSE:", response.text)
+    response.raise_for_status()
+    return response.json()["input_tokens"]
+
+
+if __name__ == "__main__":
+    print("Testing")
+    with open(r"C:\Users\Modassir\Downloads\history.json",'r') as file:
+        message = json.load(file)
+    with open(r"C:\Users\Modassir\Projects\Infinity\Infinity\tools_schema\global_tools.json",'r') as file:
+        tools = json.load(file)
+    print(count_tokens(messages=message,image_tokens=1032,model="qwen3.5_4b",url="http://127.0.0.1:8002",tools=tools))
+    input("Press enter to exit...")

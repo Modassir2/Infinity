@@ -1,0 +1,113 @@
+[
+    {
+        "type":"function",
+        "function":{
+            "name":"view_screen",
+            "description":"Get a Screenshot of the current screen.",
+            "parameters":{
+                "type":"object",
+                "properties":{}
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"left_click",
+            "description":"Left Click on anywhere on screen by its coordinates.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "coordinates":{"type":"array","description":"Array of coordiantes to left click at in [x,y] format"},
+                    "wait":{"type":"integer","description":"Time (in sec) to wait after clicking to get the screenshot. Default = 3 seconds"},
+                    "reason":{"type":"string","description":"The reason and function for clicking the button."}
+                },
+                "required":["coordinates","reason"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"right_click",
+            "description":"Right Click on anywhere on screen by its coordinates.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "coordinates":{"type":"array","description":"Array of coordiantes to right click at in [x,y] format"},
+                    "wait":{"type":"integer","description":"Time (in sec) to wait after right clicking to get the screenshot. Default = 3 seconds"},
+                    "reason":{"type":"string","description":"The reason and function for clicking the button."}
+                },
+                "required":["coordinates","reason"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"type_text",
+            "description":"Type text into a textbox.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "text":{"type":"string","description":"The text to type in the textbox."},
+                    "textbox_coordinates":{"type":"array","description":"The coordinates of the text to to focus before typing into, in [x,y] format normalized to 1000x1000 grid."},
+                    "press_enter":{"type":"boolean","description":"Wheather to press enter key after typing the text. Default = False."},
+                    "wait":{"type":"integer","description":"The time to wait after typing text. Default = 2 seconds"},
+                    "reason":{"type":"string","description":"The reason for typing the text."}
+                },
+                "required":["text","textbox_coordinates","reason"]
+            }
+        }
+    },
+        {
+        "type":"function",
+        "function":{
+            "name":"press_keyboard_buttons",
+            "description":"Press a single or multiple keybord buttons at the same time. Use to execute keyboard shortcuts or press special buttons.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "shortcut":{"type":"array","description":"The buttons to press. List of supported buttons are: \n['!', '\"', '#', '$', '%', '&', \"'\", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1',..., '9', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c',..., 'z', '{', '|', '}', '~', 'accept', 'add', 'alt', 'backspace', 'browserback', 'browserforward', 'browserhome', 'browserrefresh', 'browsersearch', 'capslock', 'clear', 'ctrl', 'del', 'down', 'end', 'enter', 'esc', 'execute', 'f1',..., 'f20', 'fn', 'home', 'insert', 'left', 'num0', 'num1',..., 'num9', 'numlock', 'pagedown', 'pageup', 'pause', 'pgdn', 'pgup', 'prntscrn', 'return', 'right', 'scrolllock', 'select', 'shift', 'sleep', 'space', 'stop', 'tab', 'up', 'win']. example- ['ctrl', 'a']"},
+                    "app_name":{"type":"string","description":"The name of the app to execute shortcut in. Case insensitive, partial match. Pass 'None' for shorcuts that are not executed in any specific app. eg- Chrome"},
+                    "wait":{"type":"integer","description":"Time (in sec) to wait after pressing keyboard shorcut to get the screenshot. Default = 3 seconds"},
+                    "reason":{"type":"string","description":"The reason/function for executing the shortcut."}
+                },
+                "required":["shortcut","app_name","reason"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"scroll",
+            "description":"Scroll up or down at any coordinate by lines.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "coordinates":{"type":"array","description":"The coordinates to scroll at."},
+                    "direction_down":{"type":"boolean","description":"The direction to scroll, True mean down and False means up. Default is True i.e down direction."},
+                    "amount":{"type":"integer","description":"The amount to scroll. Default is 6"},
+                    "wait":{"type":"integer","description":"Time (in sec) to wait after scrolling to get the screenshot. Default = 3 seconds"},
+                    "reason":{"type":"string","description":"The reason to scroll."}
+                },
+                "required":["coordinates","reason"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"wait",
+            "description":"Wait for loading screens or downloads or for repetitive task.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "interval":{"type":"integer","description":"Time to wait in seconds."},
+                    "reason":{"type":"string","description":"The reason to wait."}
+                },
+                "required":["interval","reason"]
+            }
+        }
+    }
+]
