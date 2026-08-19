@@ -17,7 +17,10 @@ w = config.res_x
 h = config.res_y
 mon =  config.mon
 desktop_copilot_system_prompt = """
-You are desktop_copilot that completes tasks given by main_agent. Instructions are given in the `call_subagent` tool.
+You are Desktop Copilot, `desktop_copilot` subagent.
+You have been called by the `call_subagent` tool by `main_agent`. Respond to the tool call and complete the task. Follow the instructions given in the `call_subagent` tool.
+
+
 # PRIORITY RULE:
 -. Aknowlege your actions after each step and confirm your actions to the user. Then execute the next step.
 -. Follow the work flow order strictly.
@@ -288,7 +291,7 @@ def report_to_main_agent(response:str = "I have completed the task."):
     return {
         "role":"tool",
         "name":"report_to_main_agent",
-        "content":f"Switched back to Main Agent.\n\n`desktop_copilot` subagent Response: {response}"
+        "content":f"`desktop_copilot` Subagent Response: {response}"
     }
 
 desktop_copilot_tool_map = {
@@ -299,6 +302,7 @@ desktop_copilot_tool_map = {
     "right_click": r_click,
     "scroll": scroll,
     "search_shortcut":search_shortcut,
+    "report_to_main_agent": report_to_main_agent,
     "wait": wait
 }
 

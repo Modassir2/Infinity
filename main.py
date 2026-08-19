@@ -111,7 +111,7 @@ def call_subagent(subagent_name:str,task_description:str):
         return {
             "role": "tool",
             "name": "call_subagent",
-            "content": f"Switched to desktop_copilot for: {task_description}"
+            "content": f"Task for `desktop_copilot`: {task_description}"
         }
     else:
         return {
@@ -145,6 +145,9 @@ def generate():
     with Live(console=console,auto_refresh=False,vertical_overflow="ellipsis") as live:
         text=Text("Processing...",style="yellow")
         live.update(text,refresh=True)
+        #utils.log(json.dumps(history.history,indent=4),path=r'.\data\debug.log',mode='a',level="DEBUG")
+        #utils.log(agent.name,path=r'.\data\debug.log',mode='a',level="DEBUG")
+        #utils.log(json.dumps(agent.tools,indent=4),path=r'.\data\debug.log',mode='a',level="DEBUG")
         response = config.client.chat.completions.create(
             messages=history.history,
             model=config.model,

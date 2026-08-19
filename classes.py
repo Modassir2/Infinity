@@ -145,30 +145,26 @@ class History:
         if self.tokens >= (config.ctx_token-config.buffer_token):
             self.clear_history(console=console)
     def optimize_history(self):
-        history = self.history
+        h = self.history
         n = config.image_n
-        imgs=0;img_index_list=[];x=0
-        for i in history:
-            if i["role"] in ("user","system","assistant"):
-                continue
-            msg=i['content']
-            if type(msg)==list:
+
+        #counting imgs in tools only
+        img_index_list=[]
+        for i in range(len(h)):
+            if h[i]["role"] == "tool" and type(h[i]["content"])==list:
+                msg=h[i]['content']
                 for j in msg:
                     if j.get('image_url'):
-                        imgs+=1
-                        img_index_list.append(x)
+                        img_index_list.append(i)
+        if len(img_index_list)>n:
+            x=len(img_index_list)-n
+            for i in range(x):
+                msg=h[img_index_list[i]]['content']
+                for j in range(len(msg)):
+                    if msg[j].get('image_url'):
+                        msg[j]={"type":"text","text":"Attached Image/Screenshot has been removed to save token space and processing time."}
                         break
-            x+=1
-        if imgs>n:
-            y=len(img_index_list)-n
-            for i in range(y):
-                x=history[img_index_list[i]]['content']
-                for j in range(len(x)):
-                    if x[j].get('image_url'):
-                        x[j]={"type":"text","text":"Attached Image/Screenshot has been removed to save token space and processing time."}
-            return history
-        else:
-            return history
+  
     def start_timer(self,live:Live,color:str="cyan"):
         def run_timer():
             start_timer = time.time()

@@ -54,7 +54,11 @@ def get_base64_url(path:str):
         b64 = base64.b64encode(f.read()).decode('utf-8')
     return f"data:image/png;base64,{b64}"
 
-def log(line:str,path:str=r'.\data\logs.txt',level:Literal["DEBUG","INFO","WARN","ERROR","FATAL"]="INFO"):
+def log(line:str,path:str=r'.\data\logs.txt',level:Literal["DEBUG","INFO","WARN","ERROR","FATAL"]="INFO",mode='r'):
+    if level=="DEBUG":
+        with open(path,mode) as f:
+            f.write(line)
+        return
     d = {
         "timestamp": get_datetime(),
         "level": level,
