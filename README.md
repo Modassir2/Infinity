@@ -126,6 +126,10 @@ Infinity/
 ├── utils.py                # Utility functions
 ├── config.json             # Configuration file
 ├── Experimental.ipynb      # Jupyter notebook for experimentation
+├── requirements.txt        # Project dependencies
+├── LICENSE                 # MIT license
+├── Run.bat                 # Windows launcher
+├── Run Endpoint Server.bat.lnk # Endpoint server launcher
 ├── functions/
 │   └── desktop_copilot.py  # Desktop copilot tool implementation
 ├── requirements/
