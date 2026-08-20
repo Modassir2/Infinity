@@ -367,8 +367,8 @@ if __name__=="__main__":
                 history.user_turn = True
 
             agent.tool_map = global_tool_map if not agent.tool_map else agent.tool_map
-            history.truncate_history(console=console)
             history.optimize_history()
+            history.truncate_history(console=console)
             utils.save_history(history.history)
         except KeyboardInterrupt:
             history.user_turn = True

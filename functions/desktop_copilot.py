@@ -20,20 +20,32 @@ desktop_copilot_system_prompt = """
 You are Desktop Copilot, `desktop_copilot` subagent.
 You have been called by the `call_subagent` tool by `main_agent`. Respond to the tool call and complete the task. Follow the instructions given in the `call_subagent` tool.
 
+# MANDATORY STEP GENERATION PHASE (DO NOT SKIP):
+**YOU MUST ALWAYS START BY GENERATING STEPS BEFORE TAKING ANY ACTION.**
+1. Analyze the task completely
+2. Generate a detailed step-by-step plan marked as "Step 1:", "Step 2:", etc.
+3. Present this plan to the user and WAIT for acknowledgment/confirmation before proceeding
+4. DO NOT execute any tool calls (left_click, type_text, etc.) until the user confirms the plan
 
-# PRIORITY RULE:
--. Aknowlege your actions after each step and confirm your actions to the user. Then execute the next step.
--. Follow the work flow order strictly.
--. Follow the steps strictly and ask user if details are vague.
--. Improvise over unexpected steps.
--. Do not submit gmails, payments, bookings etc., only fill in the details and ask the user to continue.
--. The `type_text` tool automatically brings the textbox to focus, you don't need to click on the textboox to bring it to focus.
+# EXECUTION PHASE (ONLY AFTER STEP CONFIRMATION):
+After the user acknowledges the plan:
+1. Execute each step in strict order
+2. At each step, search for relevant keyboard shortcuts using search_shortcut tool
+3. Use the appropriate tool (left_click, type_text, press_keyboard_buttons, scroll, etc.) to perform the action
+4. Verify completion by taking a screenshot and analyzing the result
+5. Acknowledge the result and move to the next step
 
-# WORK FLOW ORDER:
-1. Generate clear steps to acomplish the given task marked as Step 1, Step 2... etc.
-2. At each step search for a available keyboard shortcut and use it if any revelent shortcuts are returned.
-3. Verify if the current step is completed by looking at the screenshot before moving to next step.
-4. Improvise/edit or change steps if required or asked by user."""
+# PRIORITY RULES:
+-. NEVER execute actions before generating and confirming steps with the user
+-. Acknowledge your actions after each step and confirm status to the user before moving forward
+-. Follow the workflow order strictly - no deviations
+-. Ask the user for clarification if any task details are vague
+-. Improvise or edit steps if circumstances require it (but inform the user)
+-. Do not submit forms, emails, payments, bookings - only fill in details and ask user to continue
+-. The `type_text` tool automatically brings the textbox to focus, no need to click first
+
+# EXECUTION ORDER:
+Step Generation → User Confirmation → Execute Step 1 → Verify & Report → Execute Step 2 → ... Continue until complete"""
 
 #HELPER FUNCTIONS
 def get_screenshot(mon:int=mon):
@@ -43,7 +55,11 @@ def get_screenshot(mon:int=mon):
         base64img=base64.b64encode(img.read()).decode('utf-8')
     return f"data:image/png;base64,{base64img}"
 
-def annonated_cursor(image_url:str=get_screenshot(),coords:list[int,int]=pyautogui.position()):
+def annonated_cursor(image_url:str=None,coords:list[int,int]=None):
+    if not image_url:
+        image_url = get_screenshot()
+    if not coords:
+        coords = pyautogui.position()
     image_b64=image_url[22::]
     x,y=coords
     #Decode base64 string to OpenCV image
@@ -104,15 +120,6 @@ def load_BM25Retriever(index_path:str=r".\data\Shortcuts.md",n:int=4):
     )
 
     return bm25_search_engine
-
-#DEBUGGING FUNCTIONS
-def display_img(base64_image: str):
-    img_data = base64.b64decode(base64_image)
-    nparr = np.frombuffer(img_data, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    cv2.imshow("Test Crosshair Placement", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 #FUNCTIONS FOR MODEL
 def l_click(coordinates:list,reason:str,wait:int=3):
