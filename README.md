@@ -1,6 +1,10 @@
-# Infinity - Desktop Copilot AI Assistant
+# Infinity - Multi-Agent AI Assistant
 
 A powerful multi-agent application that can switch agents as required per task and supports fully local execution for sensitive data. Supports easy addition of custom tools/agents.
+
+## 🤖 Currently Supported Agents
+
+- **Desktop Copilot**: Can control your computer and do tasks like open chrome -> navigate to gmail -> draft an email and similar etc.
 
 ## 🌟 Features
 
