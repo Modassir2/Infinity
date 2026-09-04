@@ -1,223 +1,344 @@
-# Infinity - Desktop Copilot AI Assistant
+# Infinity
 
-A powerful multi-agent application that can switch agents as required per task and supports fully local execution for sensitive data. Supports easy addition of custom tools/agents.
+Infinity is a desktop-first AI assistant that runs in the terminal and can switch tool sets dynamically based on the task. It supports local OpenAI-compatible model backends, desktop screen interaction, web research, file-system operations, and document/image reading.
 
-## 🌟 Features
+It is designed for:
+- local-first AI workflows
+- desktop automation and inspection
+- file and project management
+- research and source-backed answers
+- persistent memory and conversation history
 
-- **Runs Fully Locally**: Runs local language models via OpenAI-compatible API and add url + port in config.json
-- **Screen Capture**: Desktop screenshot analysis capabilities for context-aware assistance
-- **Multi-Monitor Setup Support**: Configurable monitor selection for screenshot capture
-- **Wikipedia Integration**: Built-in Wikipedia search functionality
-- **Chat History**: Persistent conversation history with message tracking
-- **Memory Management**: Advanced memory consolidation system to maintain user context and preferences
-- **Tool Mapping**: Extensible tool system for custom functionality
-- **Rich Terminal Output**: Color-coded CLI output with formatted text and markdown support
+## Features
 
-## 📋 Requirements
+- Local or cloud OpenAI-compatible model support
+- Desktop screenshot capture and visual context
+- Multi-monitor support via `primary_monitor`
+- Tool-set switching at runtime with `get_tools`
+- Web search using a configured SearxNG instance
+- Wikipedia lookup support
+- File and directory management tools
+- Reading support for plain text, CSV, JSON, PDF, DOCX, and images
+- Persistent chat history and memory consolidation
+- Rich terminal UI with markdown formatting
+
+## Requirements
 
 - Python 3.8+
-- Local LLM server (configured via `config.json`) or Cloud API endpoint that is OpenAI-compatible API endpoint
+- An OpenAI-compatible LLM endpoint
+- Optional: local model server such as Ollama, vLLM, or a compatible server behind a local URL
 
-### Dependencies
+## Dependencies
 
-See [requirements/](requirements/) folder for requirements of each agent.
-See [requirements.txt](requirements.txt) for all required dependencies:
-- requests==2.34.2
-- rich==15.0.0
-- mss==10.2.0
-- Wikipedia-API==0.15.0
-- openai==2.43.0
-- pyautogui==0.9.54
-- pywin32==311
-- opencv-python==4.13.0.92
-- numpy==2.4.4
+Install the project dependencies with:
 
-## 🚀 Quick Start
+```bash
+pip install -r requirements.txt
+```
 
-### Installation
+The project includes these core packages:
 
-1. Clone the repository:
+- openai
+- rich
+- requests
+- pyautogui
+- mss
+- opencv-python
+- numpy
+- pywin32
+- pillow
+- python-docx
+- pypdf
+- wikipedia-api
+- curl_cffi
+- beautifulsoup4
+
+## Quick Start
+
+### 1) Clone the project
+
 ```bash
 git clone https://github.com/Modassir2/Infinity
 cd Infinity
 ```
 
-2. Create a virtual environment:
+### 2) Create a virtual environment
+
+On Windows:
+
 ```bash
 python -m venv .venv
-.venv\Scripts\activate  # On Windows
-source .venv/bin/activate  # On macOS/Linux
+.venv\Scripts\activate
 ```
 
-3. Install dependencies:
+On macOS/Linux:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 3) Install requirements
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Configuration
+### 4) Configure the app
 
-Edit `config.json` to configure your setup:
+Edit `config.json` with your model and server information.
+
+Example:
 
 ```json
 {
-    "base_url": "http://127.0.0.1",
-    "port": 8002,
-    "context_length": 16384,
-    "buffer_token": 4096,
-    "api_key": "your-api-key",
-    "model_id": "qwen3.5_4b",
-    "primary_monitor": 2,
-    "screen_resolution": {"x": 1920, "y": 1080},
-    "image_tokens": 1032,
-    "keep_images": 1
+  "base_url": "http://127.0.0.1:8002",
+  "context_length": 32768,
+  "buffer_token": 4096,
+  "api_key": "your-api-key",
+  "model_id": "qwen3.5_4b",
+  "primary_monitor": 2,
+  "screen_resolution": { "x": 1920, "y": 1080 },
+  "keep_images": 1,
+  "searxng_url": "http://127.0.0.1:8005",
+  "n_retry": 3,
+  "max_characters": 9000
 }
 ```
 
-**Configuration Options:**
-- `base_url`: URL of your LLM server, can be local or cloud
-  - Default value: OpenAI server url (https://api.openai.com/v1)
-- `port`: Port number for the LLM server. Set as Null for cloud
-  - Default value: None
-- `context_length`: Maximum context window for the model
- - Default value: 8192
-- `buffer_token`: Token buffer for response generation
- - Default value: 2048
+### Configuration options
+
+- `base_url`: Base URL of the OpenAI-compatible server, defaults to OpenAI
+- `context_length`: Maximum context window for the model, defaults to 8192 tokens
+- `buffer_token`: Reserved token buffer before truncation, defaults to 2048 tokens
 - `api_key`: API key for authentication
-- `model_id`: Model identifier to use
-- `primary_monitor`: Monitor number that the model will see for screenshots, for multi-monitor setup
- - Default value: 1 
-- `screen_resolution`: Desktop resolution of selected monitor
- - Default value: {'x':1920,'y':1080}
-- `image_tokens`: Token estimate for image encoding
- - Default value: 1032
-- `keep_images`: Number of images to keep in history, large values slow processing time
- - Default value: 999
+- `model_id`: Model name to use
+- `primary_monitor`: monitor number for screenshot tools, defaults to 1
+- `screen_resolution`: screen size for the selected write target, defaults to { "x": 1920, "y": 1080 }
+- `keep_images`: maximum number of screenshots/images retained in context, defaults to 999
+- `searxng_url`: URL of a SearxNG instance for web search, defaults to None i.e `web_search` tool wont work, fall back to `wiki_search` tool
+- `n_retry`: retry count for external requests
+- `max_characters`: max character length for fetched web content, defaults to 10k characters
 
-**NOTE:**
+Important:
+- `api_key` and `model_id` are required
+- other fields are optional and fall back to defaults
 
-All values can be omitted from the `config.json` file but the following are required:
-- `api_key`
-- `model_id`
+## Running Infinity
 
-### Running Infinity
-
-Double click the `run.bat` file to run directly after installation setup is complete! It activates the python venv and runs the main.py
-
-OR
+From the project root:
 
 ```bash
-# Activate venv
-.venv\Scripts\activate  # On Windows
-source .venv/bin/activate  # On macOS/Linux
-# Run Infinity
+.venv/Scripts/activate #on Windows
+source .venv/bin/activate #on Mac/Linux
 python main.py
 ```
 
-This launches the CLI interface where you can interact with the AI assistant directly in your terminal.
+You can also run the app from the included Windows launcher (`Infinity AI.bat`) if available in your environment.
 
-Type `/help` to get list of available commands.
+## Command shortcuts
 
-## 📁 Project Structure
+The app supports these commands from the CLI:
 
-```
+- `/help` — show command help
+- `/image <path>` — attach an image by full path
+- `/remove_imgs` — clear attached images from the current message
+- `/clear_imgs` — remove images from the history context
+- `/clear` — clear the conversation history
+- `/update` — reload configuration and memory settings
+- `/tokens` — show token usage
+- `/memory` — show active memory profile
+- `/general_tools` — switch back to the general tool set
+- `/tools` — show the active tool set
+- `/del` — delete current conversation context
+- `/exit` or `/bye` — exit the app
+
+## Tool sets
+
+Infinity uses dynamic tool sets. The main app can switch between:
+
+- `general_tools`
+- `web_search_tools`
+- `desktop_tools`
+- `file_management_tools`
+- `read_file_tools`
+
+### Global tools
+
+Available globally:
+- `get_tools`
+- `view_screen`
+- `update_memory`
+
+### Web search tools
+
+- `get_weather`
+- `wiki_search`
+- `web_search`
+- `fetch_url_content`
+
+### Desktop tools
+
+The desktop toolset supports:
+- `screenshot capture`
+- `left_click`
+- `right_click`
+- `typing_text`
+- `keyboard_shortcuts`
+- `scrolling`
+- `waiting`
+- `shortcut search`
+
+### File management tools
+
+The file management toolset supports:
+- `set_base_dir`
+- `make_dir`
+- `delete_dir`
+- `list_dir`
+- `rename_dir`
+- `search_dir`
+- `create_file`
+- `patch_file`
+- `write_file`
+- `read_file`
+- `read_metadata`
+- `rename_file`
+- `delete_file`
+
+### Read-file tools
+
+The specialized read toolset supports:
+- `read_pdf`
+- `read_image`
+- `read_plain_text`
+- `read_csv`
+- `find_in_file`
+- `read_json`
+- `read_docx`
+
+## Project structure
+
+```text
 Infinity/
-├── main.py                 # CLI entry point and core functionality
-├── classes.py              # Core classes (Config, Agent, History)
-├── utils.py                # Utility functions
-├── config.json             # Configuration file
-├── Experimental.ipynb      # Jupyter notebook for experimentation
-├── requirements.txt        # Project dependencies
-├── LICENSE                 # MIT license
-├── Run.bat                 # Windows launcher
-├── Run Endpoint Server.bat.lnk # Endpoint server launcher
+├── main.py
+├── classes.py
+├── utils.py
+├── config.json
+├── global_tools.json
+├── README.md
+├── requirements.txt
+├── LICENSE
+├── Experimental.ipynb
 ├── functions/
-│   └── desktop_copilot.py  # Desktop copilot tool implementation
-├── requirements/
-│   ├── required.txt        # Main dependencies
-│   └── desktop_copilot.txt # Desktop copilot specific dependencies
+│   ├── desktop_functions.py
+│   ├── file_managment_functions.py
+│   ├── read_file_functions.py
+│   └── web_search_tools.py
 ├── tools_schema/
-│   ├── desktop_copilot.json# Desktop copilot tools schema
-│   └── global_tools.json   # Global tools schema
-└── data/
-    ├── history.json        # Chat history storage
-    ├── memory.txt          # User memory profile
-    ├── logs.txt            # Application logs
-    └── Shortcuts.md        # User shortcuts documentation
+│   ├── desktop_tools.json
+│   ├── file_management_tools.json
+│   ├── read_file_tools.json
+│   ├── web_search_tools.json
+│   └── global_tools.json
+├── requirements/
+│   ├── desktop_requirements.txt
+│   ├── file_managment_requirements.txt
+│   ├── read_file_requirements.txt
+│   ├── web_search_requirements.txt
+│   └── minimum_requirements.txt
+├── data/
+│   ├── history.json
+│   ├── memory.md
+│   └── Shortcuts.md
+└── .venv/          # local virtual environment
 ```
 
-## 🔧 Core Components
+## Core architecture
 
-### Classes
-- **Config**: Manages application configuration and LLM client setup
-- **Agent**: Handles AI agent functionality and tool management
-- **History**: Tracks conversation history and message management
+### `Config`
+Loads and validates application settings. Creates the OpenAI-compatible client and stores runtime config values such as:
+- model URL
+- API key
+- model name
+- token settings
+- display configuration
+- image retention count
 
-### Utils
-Helper functions for:
-- Configuration loading
-- Datetime handling
-- File I/O operations
+### `History`
+Tracks conversation context and token use. It:
+- stores chat messages
+- truncates old history when approaching token limits
+- compresses memory based on recent conversation
+- keeps the system prompt updated with current date and active tool set
 
-### Functions
-- **desktop_copilot.py**: Implements desktop agent that can see and control your computer for you. 
+### `ToolSet`
+Contains:
+- active tool set name
+- tool schema list
+- tool execution map
 
-## 🎯 Key Features Explained
+### `utils.py`
+Contains supporting functions for:
+- loading configuration and schemas
+- memory persistence
+- datetime formatting
+- token counting
+- logging
+- history saving/loading
 
-### Memory Consolidation
-The system uses an advanced memory consolidation subsystem that:
-- Reviews chat history
-- Generates user profiles
-- Maintains preferences and context
-- Tracks ongoing tasks
-- Stores user-related facts
+## Memory system
 
-### Screen Capture Integration
-- Captures desktop screenshots
-- Encodes images to base64
-- Provides visual context to the AI model
-- Configurable per monitor
+Infinity stores a markdown memory profile in `data/memory.md`. The app uses a memory consolidation step to summarize older conversation content and preserve important user preferences, facts, and context.
 
-## 🔐 Security
+This is especially useful when:
+- the user asks to remember something
+- the assistant needs to retain ongoing task context
+- long-running conversations benefit from compact summaries
 
-- Supports Local-only by default (127.0.0.1)
-- API key configuration for LLM server access
-- No external API calls required (local LLM)
+## Security and safety
 
-## 🛠️ Development
+- Local-first configuration is encouraged
+- file-management tools validate paths and prevent directory traversal
+- the app keeps operations scoped to the active base directory
+- screenshots and attached images are kept under configurable limits
 
-### Adding Custom Tools
-1. Define tool functions in `functions/<your-agent>.py` directory
-2. Add tool schema to `tools_schema/<your-agent>.json` JSON files
-3. Map tools in `main.py` using `tool_map`
-4. Update requirements if needed
+## Troubleshooting
 
-## 📝 Troubleshooting
+### LLM connection issues
+- verify the `base_url` is correct
+- ensure the model server is running
+- confirm `api_key` and `model_id` are valid
 
-**Connection Error**: Ensure LLM server is running on configured URL and port
-**Screenshot Not Working**: Verify `primary_monitor` setting matches your display configuration
-**Memory Issues**: Check `context_length` and `buffer_token` settings
+### Screenshot or desktop tools not working
+- verify `primary_monitor` is set to the correct display
+- check `screen_resolution` is accurate for the monitor
+- ensure desktop automation dependencies are installed
 
-## 📦 Dependencies Details
+### Memory or context problems
+- reduce `context_length` or increase `buffer_token` if needed
+- use `/clear` or `/del` to reset conversation state
 
-- **openai**: OpenAI-compatible Python SDK for LLM API calls
-- **rich**: Terminal formatting and styling
-- **mss**: Screen capture library
-- **Wikipedia-API**: Wikipedia content retrieval
-- **requests**: HTTP requests library
+### Web search not working
+- confirm `searxng_url` is configured correctly
+- make sure the SearxNG service is reachable
+- check that the backend can accept search requests
 
-## 🚀 Performance Tips
+## Development notes
 
-- Adjust `context_length` based on your model's capabilities
-- Reduce `keep_images` if memory usage is high or long processing time
-- Use `buffer_token` to ensure response completion
-- For low-end pc, use `qwen3.5-4b` local model with 16k context. Only requires 4GB VRAM.
+The app is structured so new tool groups can be added with a few steps:
 
-## 📄 License
+1. create a tool module in `functions/`
+2. define the tool schemas in `tools_schema/`
+3. add the tool map and instructions in `main.py` in `tool_set_map`
+4. update dependencies if needed
 
-This project is licensed under the [MIT License](LICENSE).
+This keeps the system modular without needing a large rewrite.
 
-## 🤝 Contributing
+## License
 
-Contributions welcome! Please feel free to submit issues and enhancement requests.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
----
+## Contributing
+
+Pull requests, improvements, and issue reports are welcome. The project is intended to stay lightweight, modular, and practical for local AI workflows.
