@@ -328,10 +328,11 @@ This is especially useful when:
 
 The app is structured so new tool groups can be added with a few steps:
 
-1. create a tool module in `functions/`
-2. define the tool schemas in `tools_schema/`
+1. create a tool module in `functions/<your_func>.py`
+2. define the tool schemas in `tools_schema/<your_schema>.json`
 3. add the tool map and instructions in `main.py` in `tool_set_map`
-4. update dependencies if needed
+4. add tool set in `global_tools.json` under `get_tools` function. Set "const" to exact name (<your_schema>) as the json schema file without the file extention
+5. update requirements.txt/dependencies if needed
 
 This keeps the system modular without needing a large rewrite.
 
