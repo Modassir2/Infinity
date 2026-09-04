@@ -1,38 +1,72 @@
 import json
-import time
-import requests
 from datetime import datetime
 import base64
 from typing import Literal
 
+import requests
+
+
 system_prompt = """# Role and Core Objective
-You are Infinity, the `main_agent`. Your job is to analyze the user's request and answer directly in most cases. Delegate the task to the single most qualified sub-agent if required.
+You are Infinity, a smart AI assistant with access to multiple tool sets. Respond to user's request directly without tool call when required. If the task cannot be completed with provided tools, call `get_tools` function to get a different set of tools as per the task.
 
-# Agent Routing & Delegation Framework
-You operate under a strict "Capability-to-Task Match" protocol. You are strictly forbidden from routing a task to any sub-agent whose explicitly declared capabilities do not cover the core intent of that task.
+# Tool Sets
+Use a tool set to only when it is required or user asks explicitly. Follow the instructions of each tool set strictly when using that tool set.
+Current tool set: {tool_set}
 
-## Core Routing Principles
+# Instructions for {tool_set}
+{instructions}
 
-1. Core Intent Extraction
-   - Before choosing a sub-agent, extract the primary verb and domain of the user's request (e.g., calculation, file manipulation, web search).
+{memory}
 
-2. Strict Positive Matching
-   - Match the extracted domain ONLY to sub-agents that explicitly list that capability in their profile.
-   - If a capability is not explicitly listed for a sub-agent, assume that sub-agent is completely incapable of performing it.
-
-3. Task completion
-   - Complete the task directly by yourself when no specialized subagent is available for the task.
-   - Directly complete short tasks on your own when possible instead of calling subagent.
-
-4. Multi-Step Decomposition
-   - If a request requires multiple domains (e.g., "Calculate X and write it to a file"), you must break it down. 
-   - Delegate the domain-specific logic (calculation) to the appropriate specialist or do it yourself, then pass the output to the operational specialist (file writing).
-
-5. Complete Domain Isolation (Zero Cross-Over)
-   - Do not assume an agent can perform a task simply because it has a general-purpose operating environment.
-   - Example: A system/OS-level agent must never be used for content generation, calculation, or logic tasks unless explicitly stated, even if it has access to tools that could theoretically run those tasks.
+# Current Date and Time
+{dt}
 """
-buffer_tokens = 1000
+
+compression_prompt = """
+You are an advanced memory consolidation agent. Review the given chat log and generate a updated memory profile. 
+Your task is only to generate user profile from the chat history, do not output anything else.
+Generate a updated profile with any new preferences, context, facts, project details, or decisions.
+Do not output anything else, only output the updated markdown profile.
+Maintain the Markdown format cleanly. Delete outdated information. Use the following format, addition to the format is allowed if required:
+
+# Memory
+## User Core Identity & Preferences
+- Name: Not Provided / [NAME]
+- Preferences: None / What the user prefers and likes (eg- color, food, tone etc).
+- Dislikes: None / What the user hates or dislikes.
+
+## Recent Chat memory
+1. eg. 26th June 2026 3:05 pm - Mention the timestamp of conversations for each point.
+2. <timestamp> - Summarize the current chat both user request and agents reponse, keep it short and crisp.
+3. <timestamp> - The list must be in descending order, newest first.
+4. <timestamp> - Keep maximum of 20 points here and if more than 20 points then remove the oldest memory first.
+5. <timestamp> - Keep maximum old chat memory possible while adding new memory without exceeding the limits.
+6. <timestamp> - Keep maximum details in least words.
+
+## Ongoing Task (if any)
+- Current Task: Task provided by user and not yet completed by agent. If no incomplete task then only None.
+- Task Details (if Task): Mention any nessesary details required for the task.
+- Addtional Context (if task): More background context or None.
+
+## Facts and Information
+- Only keep very important or needed facts here. Do not store unneccesary facts.
+- user realted facts. eg:
+- user's phone is black
+- user's computer has <computer specs>
+- user lives in <city> etc.
+- remove facts that are no longer required or unnessesary.
+  
+## Add More if required (for eg- user asks explicitly)"""
+
+with open(r'.\\global_tools.json') as f:
+    global_tools=json.load(f)
+def load_schema(name:str):
+    if not name.endswith(".json"):
+        name+=".json"
+    path = r".\\tools_schema\\" + name
+    with open (path,'r') as file:
+        schema = json.load(file)
+    return schema + global_tools
 
 def load_config(path:str=r".\config.json"):
     file = open(path,'r')
@@ -40,48 +74,40 @@ def load_config(path:str=r".\config.json"):
     file.close()
     return config
 
-def load_schema(name:str):
-    if not name.endswith(".json"):
-        name+=".json"
-    path = r".\\tools_schema\\" + name
-    file = open(path,'r')
-    schema = json.load(file)
-    file.close()
-    return schema
-
 def get_base64_url(path:str):
     with open(path,'rb') as f:
         b64 = base64.b64encode(f.read()).decode('utf-8')
     return f"data:image/png;base64,{b64}"
 
-def log(line:str,path:str=r'.\data\logs.txt',level:Literal["DEBUG","INFO","WARN","ERROR","FATAL"]="INFO",mode='r'):
+def log(line:str,path:str=r'.\data\logs.log',level:Literal["DEBUG","INFO","WARN","ERROR","FATAL"]="INFO",mode='r'):
     if level=="DEBUG":
-        with open(path,mode) as f:
+        with open(path,mode,encoding='utf-8') as f:
             f.write(line)
         return
     d = {
         "timestamp": get_datetime(),
-        "level": level,
-        "details":line
+        "level": str(level),
+        "details":str(line)
     }
     with open(path,'a') as file:
         file.write(json.dumps(d)+'\n')
 
 def save_history(history:list):
     #log("History Saved utils.txt save_history() line 63",path=r".\data\debug.txt",level="DEBUG")
-    with open(r'.\data\history.json','w') as f:
+    with open(r'.\data\history.json','w',encoding='utf-8') as f:
         json.dump(history,f,indent=4)
     
 def load_history():
     try:
-        with open(r".\data\history.json",'r') as file:
+        with open(r".\data\history.json",'r',encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
+        #return [{"role":"system","content":system_prompt.format(tool_set="global_tools",instructions=None,memory=load_memory(),dt=get_datetime())}]
         return [{"role":"system","content":system_prompt}]
     
 def load_memory():
     try:
-        with open(r'.\data\memory.md','r') as file:
+        with open(r'.\data\memory.md','r',encoding='utf-8') as file:
             return file.read()
     except FileNotFoundError:
         return None
@@ -106,7 +132,7 @@ def count_tokens(messages: list[dict],model,url,api_key, tools = None) -> int:
     if tools:
         payload["tools"] = tools
 
-    for i in range(3):
+    for _ in range(5):
         response = requests.post(
             f"{url}/v1/chat/completions/input_tokens",
             json=payload,

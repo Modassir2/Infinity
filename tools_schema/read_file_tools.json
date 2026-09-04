@@ -1,0 +1,107 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "read_pdf",
+            "description": "Read a PDF file and return extracted text for a selected page.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the PDF file."},
+                    "page": {"type": "integer", "description": "Page number to read, starting from 1.", "default": 1}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_image",
+            "description": "Read an image file and return it in a format compatible with the model.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the image file. Supported: png, jpg, jpeg."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_plain_text",
+            "description": "Read plain text from a file with optional line-range selection.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the text file."},
+                    "start_line": {"type": "integer", "description": "Starting line number, inclusive.", "default": 1},
+                    "end_line": {"type": "integer", "description": "Ending line number, inclusive.", "default": 100}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_csv",
+            "description": "Read a CSV file and convert it into a markdown-like table for the model.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the CSV file."},
+                    "max_rows": {"type": "integer", "description": "Maximum number of rows to display in the converted table.", "default": 50}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "find_in_file",
+            "description": "Search for a text query inside a file and return matching lines.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the file to search."},
+                    "query": {"type": "string", "description": "Text to find inside the file."},
+                    "case_sensitive": {"type": "boolean", "description": "Whether the search should be case-sensitive.", "default": false},
+                    "max_matches": {"type": "integer", "description": "Maximum matching lines to return.", "default": 20}
+                },
+                "required": ["path", "query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_json",
+            "description": "Read and return JSON content from a file in a readable text format.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the JSON file."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_docx",
+            "description": "Read the text content from a DOCX file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path to the DOCX file."}
+                },
+                "required": ["path"]
+            }
+        }
+    }
+]

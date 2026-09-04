@@ -1,53 +1,26 @@
 import utils
+
+import threading
+import time
+
 from openai import  OpenAI
 from rich.console import Console
 from rich.live import Live
 from rich.text import Text
-import threading
-import time
-#import functions.global_functions as global_functions #Don't try this ever again, trust me its not worth it! Never will be.
+
+
 console = Console()
-
-compression_prompt = """
-You are an advanced memory consolidation subsystem. Review the given chat history and generate a updated memory profile. 
-Your task is only to generate user profile from the chat history, do not output anything else.
-Generate a updated profile with any new preferences, context, facts, project details, or decisions.
-Do not output anything else, only output the updated markdown profile.
-Maintain the Markdown format cleanly. Delete outdated information. Use the following format:
-
-# Memory
-## User Core Identity & Preferences
-- Name: Not Provided / [NAME]
-- Preferences: What the user prefers and likes (eg- color, food, tone etc).
-- Dislikes: What the user hates or dislikes.
-
-## Recent Chat memory
-1. eg. 26th June 2026 3:05 pm - Mention the timestamp of conversations for each point.
-2. <timestamp> - Summarize the current chat both user request and agents reponse, keep it short and crisp.
-3. <timestamp> - The list must be in descending order, newest first.
-4. <timestamp> - Keep maximum of 20 points here and if more than 20 points then remove the oldest memory first.
-5. <timestamp> - Keep maximum old chat memory possible while adding new memory without exceeding the limits.
-6. <timestamp> - Keep maximum details in least words.
-
-## Ongoing Task (if any)
-- Current Task: Task provided by user and not yet completed by agent. If no incomplete task then only None.
-- Task Details (if Task): Mention any nessesary details required for the task.
-- Addtional Context (if task): More background context or None.
-
-## Facts and Information
-  - user realted facts. eg:
-  - user's phone is black
-  - user's computer has <computer specs>
-  - user lives in <city> etc.
-  - remove facts that are no longer required or unnessesary."""
 
 class Config:
     def __init__(self):
         self.update_config()
     def update_config(self):
         config = utils.load_config()
-        base_url, port = config.get("base_url","https://api.openai.com/v1"), int(config.get("port"))
-        self.url = f"{base_url}:{port}" if port else base_url
+        base_url = config.get("base_url","https://api.openai.com/v1")
+        self.url = base_url
+        self.searx_url = config.get("searxng_url",None)
+        self.n_retry = config.get("n_retry",3)
+        self.max_chrs = config.get("max_characters",20000)
         self.api_key = config.get("api_key")
         if not self.api_key:
             raise ValueError("'api_key' not provided in config.json")
@@ -57,7 +30,6 @@ class Config:
             raise ValueError("'model_id' not provided in config.json")
         self.ctx_token = config.get("context_length",8192)
         self.buffer_token = int(config.get("buffer_token",2048))
-        self.image_tokens = int(config.get("image_tokens",1032))
         def_res = {'x':1920,'y':1080}
         self.res_x = int(config.get("screen_resolution",def_res)['x'])
         self.res_y = int(config.get("screen_resolution",def_res)['y'])
@@ -66,11 +38,11 @@ class Config:
 
 
 
-class Agent:
+class ToolSet:
     def __init__(self):
-        self.name = "main_agent"
-        self.tools = utils.load_schema("global_tools.json")
-        self.tool_map = {}
+        self.tool_set = None
+        self.tools = utils.global_tools
+        self.tool_map = None
 
 
 
@@ -78,19 +50,22 @@ class History:
     def __init__(self):
         #Main items
         self.history = utils.load_history()
-        self.system_prompt=utils.system_prompt
         self.user_turn = True
-        self.update()
+        self.instructions=None
         self.thinking = False
     def update_sysmem_dt(self):
-        self.history[0]["content"] = self.system_prompt + '\n\n' + utils.load_memory() + f"\nCurrent Date and Time: {utils.get_datetime()}"
+        self.history[0]["content"] = utils.system_prompt.format(tool_set=tools.tool_set,instructions=self.instructions,memory=utils.load_memory(),dt=f"Current Date and Time: {utils.get_datetime()}")
     def update(self):
-        self.tokens = utils.count_tokens(messages=self.history,model=config.model,url=config.url,tools=agent.tools,api_key=config.api_key)
+        self.tokens = utils.count_tokens(messages=self.history,model=config.model,url=config.url,tools=tools.tools,api_key=config.api_key)
     def print_tokens(self,console:Console):
         self.update()
         ctx_token=config.ctx_token
         return console.print(f"Token count: {self.tokens}/{ctx_token}; {(self.tokens/ctx_token)*100:.2f}%", style="yellow")
     def clear_history(self,console:Console):
+        console.print("Clearing History...",style="yellow",end="\r")
+        if len(self.history)<=1:
+            console.print("History is already cleared!",style='yellow')
+            return
         old_mem = utils.load_memory() if utils.load_memory() else "None"
         chat_log = ""
         for i in self.history:
@@ -122,10 +97,9 @@ class History:
             else:
                 continue
         message = [
-            {"role":"system","content":compression_prompt},
+            {"role":"system","content":utils.compression_prompt},
             {"role":"user","content":f"Old Profile:\n {old_mem}\n\n Chat Log:\n{chat_log}"}
         ]
-        console.print("Trucating History...",style="yellow",end="\r")
         response = config.client.chat.completions.create(
             messages=message,
             model=config.model,
@@ -133,17 +107,32 @@ class History:
             extra_body={"chat_template_kwargs": {"enable_thinking": False}}
         )
         #utils.log(response.choices[0].message.content)
-        with open(r".\data\memory.txt",'w') as file:
+        with open(r".\data\memory.md",'w',encoding='utf-8') as file:
             file.write(response.choices[0].message.content)
         self.history = [{"role":"system","content":utils.system_prompt}]
         self.update_sysmem_dt()
         utils.save_history(self.history)
         self.update()
-        console.print(f"{'History Truncated!':<21}",style="yellow")
+        console.print(f"{'History Cleared!':<21}",style="yellow")
         self.print_tokens(console=console)
     def truncate_history(self,console:Console):
-        if self.tokens >= (config.ctx_token-config.buffer_token):
-            self.clear_history(console=console)
+        count=0
+        while len(self.history)>1:
+            self.update()
+            if self.tokens >= (config.ctx_token-config.buffer_token):
+                console.print("Token Limit exceeded, deleting oldest message...",style='yellow',end="\r");count+=1
+                #self.clear_history(console=console)
+                self.history.pop(1)
+                '''
+                if self.history[1]["content"]:
+                    self.history[1]["content"] = "Message has been removed to manage token limit."
+                else:
+                    self.history.pop(1)
+                '''
+                continue
+            if count:
+                console.print(f"Token Limit was exceeded; Deleted {count} oldest messages!",style='yellow')
+            break
     def optimize_history(self):
         h = self.history
         n = config.image_n
@@ -183,9 +172,8 @@ class History:
             #console.file.write("\r\x1b[K")
             live.update("",refresh=True)
 
-
 config = Config()
-agent = Agent()
+tools = ToolSet()
 history = History()
 
 if __name__ == "__main__":

@@ -1,0 +1,61 @@
+[
+    {
+    "type": "function",
+    "function": {
+        "name": "get_tools",
+        "description": "Get a different set of tools.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "tool_set": {
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "const":"web_search_tools",
+                            "description": "View user screen, web search, weather forecast, wiki search and other basic tools."
+                        },
+                        {
+                            "const": "desktop_tools",
+                            "description": "Control desktop applications, performs UI actions, clicks, and types."
+                        },
+                        {
+                            "const": "file_management_tools",
+                            "description": "Create, modify, delete, read files and directories."
+                        },
+                        {
+                            "const": "read_file_tools",
+                            "description": "Read different types of files- images, pdf, docx, csv, txt, log etc"
+                        }
+                    ],
+                    "description":"Tool set to switch to."
+                }
+            },
+            "required": ["tool_set"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"view_screen",
+            "description":"View user's primary computer screen.",
+            "parameters":{
+                "type":"object",
+                "properties":{}
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"update_memory",
+            "description":"Update memory automatically. Use when user says to remember, forget or memorise something.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "instruction":{"type":"string","description":"Special Instruction for updating memory. eg- Remove 'xyy' from memory as user asked.","default":null}
+                }
+            }
+        }
+    }
+]

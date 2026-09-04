@@ -1,9 +1,20 @@
-requests==2.34.2
-rich==15.0.0
-mss==10.2.0
-Wikipedia-API==0.15.0
-openai==2.43.0
-pyautogui==0.9.54
-pywin32==311
-opencv-python==4.13.0.92
-numpy==2.4.4
+# Project-wide dependencies
+# Aggregated from function-specific requirement files
+
+openai
+rich
+requests
+pyautogui
+mss
+opencv-python
+numpy
+pywin32
+langchain-community
+langchain-core
+pillow
+python-docx
+pypdf
+wikipedia-api
+requests
+curl_cffi
+beautifulsoup4

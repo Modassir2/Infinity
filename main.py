@@ -1,21 +1,29 @@
 import utils
-from classes import agent,config,history
-
+from classes import tools,config,history
 
 import json
+import os
+import base64
+
 from rich.console import Console
 console = Console()
 from rich.live import Live
 from rich.markdown import Markdown
 from rich.text import Text
 import mss
-import base64
-import wikipediaapi
-import os
-import requests
 
-#SUBAGENT FUNCTIONS
-from functions.desktop_copilot import desktop_copilot_tool_map, desktop_copilot_system_prompt
+#TOOLSETS and FUNCTIONS
+from functions.web_search_tools import web_search_tool_map,web_search_instructions
+from functions.desktop_functions import desktop_tool_map,desktop_tools_instructions
+from functions.file_managment_functions import file_management_tool_map,file_management_instructions
+from functions.read_file_functions import read_file_tool_map,read_file_instructions
+
+tool_set_map={
+    "web_search_tools": {"tool_map":web_search_tool_map,"instructions":web_search_instructions},
+    "desktop_tools": {"tool_map":desktop_tool_map,"instructions":desktop_tools_instructions},
+    "file_management_tools": {"tool_map":file_management_tool_map,"instructions":file_management_instructions},
+    "read_file_tools": {"tool_map":read_file_tool_map,"instructions":read_file_instructions},
+}
 
 
 warn2_color = "orange"#"df7700ff"
@@ -44,97 +52,89 @@ def view_screen(mon:int=config.mon):
         ]
     }
 
-def get_weather(city:str):
-    city=city.lower()
-    geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&language=en&format=json"
-    geo_response = requests.get(geo_url).json()
-    if not geo_response.get("results"):
-        return {
-            "role":"tool",
-            "name":"get_weather",
-            "content":f"{city} not found!"
-        }
-    
-    latitude=geo_response['results'][0]['latitude']
-    longitude=geo_response['results'][0]['longitude']
+def update_memory(instruction:str=None):
+        old_mem = utils.load_memory() if utils.load_memory() else "None"
+        chat_log = ""
+        for i in history.history:
+            if i["role"] == "user":
+                chat_log += "\n[user:]\n"
+                if type(i["content"]) == list:
+                    content = ""
+                    for j in i["content"]:
+                        if j.get("text"):
+                            content += j.get("text")+'\n'
+                    content = content.strip()
+                else:
+                    content = i["content"]
+                chat_log += content
+            elif i["role"] == "assistant" and i["content"] != None:
+                chat_log += "\n[agent:]\n"
+                chat_log += i["content"]
+            elif i["role"] == "tool":
+                chat_log += "\n[tool:]\n"
+                if type(i["content"]) == list:
+                    content = ""
+                    for j in i["content"]:
+                        if j.get("text"):
+                            content += j.get("text")+'\n'
+                    content = content.strip()
+                else:
+                    content = i["content"]
+                chat_log += content
+            else:
+                continue
+        message = [
+            {"role":"system","content":utils.compression_prompt},
+            {"role":"user","content":f"Old Profile:\n```markdown\n{old_mem}\n```\n\nChat Log:\n{chat_log}\n\nPriority Instruction: {instruction}"}
+        ]
+        response = config.client.chat.completions.create(
+            messages=message,
+            model=config.model,
+            temperature=0,
+            extra_body={"chat_template_kwargs": {"enable_thinking": False}}
+        )
+        #utils.log(response.choices[0].message.content)
+        with open(r".\data\memory.md",'w',encoding='utf-8') as file:
+            file.write(response.choices[0].message.content)
+        history.update_sysmem_dt()
 
-    weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true"
-    weather_data = requests.get(weather_url).json()
-    current = weather_data["current_weather"]
-    temp = current["temperature"]
-    wind = current["windspeed"]
-    wind_dir= current["winddirection"]
-    is_day = current["is_day"]
-    code = current["weathercode"]
-    #return current
-    return {
-        "role":"tool",
-        "name":"get_weather",
-        "content":f"Time: {utils.get_datetime()}\nTemperature:{temp}°C\nWindspeed: {wind}\nWind Direction: {wind_dir}\nIs Day: {is_day}\nWeather Code: {code}"
-    }
-def wiki_search(query:str, offset:int=4000) -> dict:
-    user_agent = "AIAgentPrototype_Infinity (contact: mimodassir12@gmail.com)"#Wikipedia requires a descriptive User-Agent string to monitor traffic
-    wiki = wikipediaapi.Wikipedia(
-        user_agent=user_agent,
-        language='en',
-        extract_format=wikipediaapi.ExtractFormat.WIKI
-    )
-    
+        return {"role":"tool","name":"update_memory","content":"Memory has been updated automatically."}
+
+def get_tools(tool_set:str):
+    tool_set=tool_set.lower()
     try:
-        page = wiki.page(query)
-    except Exception as e:
+        t = utils.load_schema(name=tool_set)
+        t_map = tool_set_map[tool_set]["tool_map"] | global_tool_map
+    except (FileNotFoundError,KeyError):
         return {
             "role":"tool",
-            "name":"wiki_search",
-            "content":f"An error occured while searching: {e}"
+            "name":"get_tools",
+            "content":f"Invalid Tool Set Name: {tool_set}"
         }
-
-    if not page.exists():
-        return {
-            "role":"tool",
-            "name":"wiki_search",
-            "content":f"No Wikipedia page found for query: '{query}'. Try another keyword."
-        }
+    tools.tool_set=tool_set
+    tools.tool_map=t_map
+    tools.tools=t
+    history.instructions=tool_set_map[tool_set].get("instructions",None)
     return {
-        "role":"tool",
-        "name":"wiki_search",
-        "content":[{"type":"text","text":f"# {page.title}\n## Summary: {page.summary[:2000]+'...' if len(page.summary)>2000 else page.summary}\n## Full_content: {page.text[:offset]+'...' if len(page.text)>offset else page.text}\n\nURL: {page.fullurl}"}]
+        "role": "tool",
+        "name": "get_tools",
+        "content": f"Switched tools to {tool_set}"
     }
 
-def call_subagent(subagent_name:str,task_description:str):
-    subagent_name=subagent_name.lower()
-    if subagent_name=="desktop_copilot":
-        agent.name="desktop_copilot"
-        agent.tool_map=desktop_copilot_tool_map
-        agent.tools=utils.load_schema(name=r"desktop_copilot.json")
-        history.system_prompt=desktop_copilot_system_prompt
-        return {
-            "role": "tool",
-            "name": "call_subagent",
-            "content": f"Task for `desktop_copilot`: {task_description}"
-        }
-    else:
-        return {
-            "role":"tool",
-            "name":"call_subagent",
-            "content":f"Invalid Subagent name called: {subagent_name}"
-        }
+
 #----------TEST AND DEBUGGIN AREA----------
-#print(get_weather("kolkata"))
+#print(json.dumps(fetch_url_content(url="https://www.timeanddate.com/worldclock/india/kolkata"),indent=4))
 #exit()
 #------------------------------------------
 
 
 # GLOBAL VARIABLES, LOT OF PAIN AND BRAIN
 global_tool_map = {
+    "get_tools":get_tools,
     "view_screen":view_screen,
-    "get_weather":get_weather,
-    "wiki_search":wiki_search,
-    "call_subagent":call_subagent
+    "update_memory":update_memory
 }
-agent.name = "main_agent"
-agent.tools = utils.load_schema("global_tools.json")
-agent.tool_map = global_tool_map
+tools.tool_map=global_tool_map
 
 
 # MAIN FUNCTIONS
@@ -152,7 +152,7 @@ def generate():
             messages=history.history,
             model=config.model,
             stream=True,
-            tools=agent.tools,
+            tools=tools.tools,
             #extra_body={"chat_template_kwargs": {"enable_thinking": True}}
         )
         try:
@@ -191,12 +191,11 @@ def generate():
             tool_dict={}
     if not tool_dict:
         if output:
-            history.history.append({"role":"assistant","name":agent.name,"content":output})
+            history.history.append({"role":"assistant","content":output})
     else:
         history.history.append(
             {
                 "role":"assistant",
-                "name":agent.name,
                 "content": output if output else None,
                 "tool_calls":[
                     {"id":tool_dict[id]["id"],"type":"function","function":{"name":tool_dict[id]["name"],"arguments":tool_dict[id]["arguments_str"]}} for id in tool_dict
@@ -229,14 +228,15 @@ help_text = Markdown("""
 * **`/update`** — Reload configuration and refresh memory settings.
 * **`/tokens`** — Print token usage statistics.
 * **`/memory`** — View active model memory.
-* **`/main_agent`** — Reset back to the main agent.
-* **`/agent`** — Print name of the current agent.
+* **`/general_tools`** — Reset back to general tools set.
+* **`/tools`** — Print currently active tool set.
 * **`/del`** — Delete the current context, without saving to memory.
 * **`/exit`** or **`/bye`** — Exit the application.
 """)
 # The Main loop, lwk even i can't comprehend what i hav built! lol
 if __name__=="__main__":
     msg=""
+    history.truncate_history(console=console)
     while True:
         try:
             #console.print()
@@ -246,7 +246,7 @@ if __name__=="__main__":
                 if not prompt.strip():
                     console.print("Empty Message detected!",style=warn_color)
                     continue
-                command = prompt.strip()
+                command = prompt.strip().lower()
                 if command == '/exit' or command == '/bye':
                     exit()
                 elif command[:6] == "/image":
@@ -264,12 +264,13 @@ if __name__=="__main__":
                     console.print(f"Image Attached: {path}",style=warn_color)
                     continue
                 elif command == '/remove_imgs':
+                    console.print("Removed Attached Images",style=warn_color)
                     msg = ""
                     continue
                 elif command == '/clear_imgs':
                     h=history.history
                     for i in range(len(h)):
-                        if h[i]["role"] == "user" and type(h[i]["content"])==list:
+                        if h[i]["role"] in ("user","tool") and type(h[i]["content"])==list:
                             content = h[i]["content"]
                             for j in range(len(content)):
                                 if content[j].get("image_url"):
@@ -292,24 +293,22 @@ if __name__=="__main__":
                 elif command == '/memory':
                     console.print(Markdown(f"**Model Memory:**\n{utils.load_memory()}"),style=response_color)
                     continue
-                elif command == '/main_agent':
-                    if agent.name == "main_agent":
-                        console.print("main agent already active!",style=warn_color)
+                elif command == '/general_tools':
+                    if tools.tool_set == "general_tools":
+                        console.print("General tools are already active!",style=warn_color)
                         continue
-                    agent.name="main_agent"
-                    agent.tool_map=global_tool_map
-                    agent.tools=utils.load_schema(r'global_tools.json')
-                    history.system_prompt=utils.system_prompt
-                    console.print("Switched back to main agent",style=warn_color)
+                    get_tools("general_tools.json")
+                    console.print("Switched back General tools",style=warn_color)
                     continue
-                elif command == '/agent':
-                    console.print(f"Current agent: {agent.name}",style=warn_color)
+                elif command == '/tools':
+                    console.print(f"Current Tool Set: {tools.tool_set}",style=warn_color)
                     continue
                 elif command == '/help':
                     console.print(help_text)
                     continue
                 elif command == '/del':
                     history.history = [{"role":"system","content":utils.system_prompt}]
+                    history.update_sysmem_dt()
                     utils.save_history(history.history)
                     console.print("History Context Erased",style=warn_color)
                     continue
@@ -317,14 +316,19 @@ if __name__=="__main__":
                     console.print(f"Unknown Command: {command}",style=warn_color)
                     continue
 
+                prompt = prompt + f"\nTimestamp: {utils.get_datetime()}"
                 if not msg:
-                    msg=prompt
+                    msg = prompt
                 else:
                     msg.append({"type":"text","text":prompt})
                 history.history.append({"role":"user","content":msg})
                 msg=""
                 console.print()
-                console.print(f"[{agent.name.upper()}:]",style=assistant_color)
+
+                console.print("[Infinity:]",style=assistant_color)
+                history.optimize_history()
+                history.truncate_history(console=console)
+                utils.save_history(history.history)
 
             tool_dict = generate() #Main func call is here............
 
@@ -339,7 +343,7 @@ if __name__=="__main__":
                     console.print(f"[TOOL_CALL:] Executeing: {name}({args})",style=tool_color)
                     try:
 
-                        tool_response = agent.tool_map[name](**args) #Tool Execution is here............
+                        tool_response = tools.tool_map[name](**args) #Tool Execution is here............
 
                     except Exception as e:
                         tool_response = {
@@ -347,34 +351,32 @@ if __name__=="__main__":
                             "name":name,
                             "content":f"An error occured while executing tool call: {e}"
                         }
-                    tool_response['tool_call_id'] = tool_dict[id]["id"]
-                    history.history.append(tool_response)
+                    if tool_response:
+                        tool_response['tool_call_id'] = tool_dict[id]["id"]
+                        history.history.append(tool_response)
 
-                    #printing tool response...lwk, nothing important
-                    if type(tool_response["content"]) == list:
-                        output = ''
-                        for i in tool_response["content"]:
-                                if i.get("text"):
-                                    output += i.get("text") + '\n'
+                        #printing tool response...lwk, nothing important
+                        if type(tool_response["content"]) == list:
+                            output = ''
+                            for i in tool_response["content"]:
+                                    if i.get("text"):
+                                        output += i.get("text") + '\n'
+                            output = output.strip()
+                        else:
+                            output = tool_response["content"].strip()
+                        output = output[:500]+'...' if len(output)>500 else output
                         output = output.strip()
-                    else:
-                        output = tool_response["content"].strip()
-                    output = output[:500]+'...' if len(output)>500 else output
-                    output = output.strip()
-                    console.print(f"[TOOL_OUTPUT:] {output if output else None}",style=tool_color)
+                        console.print(f"[TOOL_OUTPUT:] {output if output else None}",style=tool_color,markup=False)
 
             else:
                 history.user_turn = True
 
-            agent.tool_map = global_tool_map if not agent.tool_map else agent.tool_map
-            history.optimize_history()
-            history.truncate_history(console=console)
             utils.save_history(history.history)
         except KeyboardInterrupt:
             history.user_turn = True
             continue
         except Exception as e:
+            utils.log(e,level="FATAL")
             history.user_turn = True
-            console.print(f"An Error occured: \n{e}",style=error_color)
-            utils.log(e,level="ERROR")
+            console.print(f"An Error occured: \n{e}",style=error_color,markup=False)
             continue

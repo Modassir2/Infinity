@@ -1,0 +1,60 @@
+[
+    {
+        "type":"function",
+        "function":{
+            "name":"get_weather",
+            "description":"Get weather details by city name.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "city":{"type":"string","description":"The city to get weather details for."}
+                },
+                "required":["city"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"wiki_search",
+            "description":"Search wikipedia for facts and information.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "query":{"type":"string","description":"Search Keyword."},
+                    "offset":{"type":"integer","description":"'Number of Characters to return in full content.","default":4000}
+                },
+                "required":["query"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"web_search",
+            "description":"Search the web for matching urls.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "query":{"type":"string","description":"Search Keyword."},
+                    "n_result":{"type":"integer","description":"Number of search results to return.","default":5}
+                },
+                "required":["query"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"fetch_url_content",
+            "description":"Get full content of a website url from `web_search` tool.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "url":{"type":"string","description":"Full website url to fetch content from."}
+                },
+                "required":["url"]
+            }
+        }
+    }
+]

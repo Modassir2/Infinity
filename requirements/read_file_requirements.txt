@@ -1,0 +1,4 @@
+# Dependencies for read_file_functions.py
+pillow
+python-docx
+pypdf

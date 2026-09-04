@@ -1,0 +1,7 @@
+# Global project dependencies for core runtime and function modules
+# Includes imports used across main.py, utils.py, classes.py, and the function tool modules
+
+openai
+rich
+mss
+requests

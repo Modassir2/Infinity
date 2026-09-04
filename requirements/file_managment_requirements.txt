@@ -1,0 +1,3 @@
+# Dependencies for file_managment_functions.py
+# No third-party package dependencies required.
+# Uses only Python standard library modules: os, shutil

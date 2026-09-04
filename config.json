@@ -1,12 +1,13 @@
 {
-    "base_url":"http://127.0.0.1",
-    "port":8002,
-    "context_length":16384,
-    "buffer_token":2048,
+    "base_url":"http://127.0.0.1:8002",
+    "context_length":32768,
+    "buffer_token":4096,
     "api_key":"moda",
     "model_id":"qwen3.5_4b",
     "primary_monitor":2,
     "screen_resolution":{"x":1920,"y":1080},
-    "image_tokens":1032,
-    "keep_images": 3
+    "keep_images": 1,
+    "searxng_url": "http://127.0.0.1:8005",
+    "n_retry": 3,
+    "max_characters": 9000
 }

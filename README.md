@@ -1,10 +1,6 @@
-# Infinity - Multi-Agent AI Assistant
+# Infinity - Desktop Copilot AI Assistant
 
 A powerful multi-agent application that can switch agents as required per task and supports fully local execution for sensitive data. Supports easy addition of custom tools/agents.
-
-## 🤖 Currently Supported Agents
-
-- **Desktop Copilot**: Can control your computer and do tasks like open chrome -> navigate to gmail -> draft an email and similar etc.
 
 ## 🌟 Features
 
@@ -83,19 +79,19 @@ Edit `config.json` to configure your setup:
 - `port`: Port number for the LLM server. Set as Null for cloud
   - Default value: None
 - `context_length`: Maximum context window for the model
-  - Default value: 8192
+ - Default value: 8192
 - `buffer_token`: Token buffer for response generation
-  - Default value: 2048
+ - Default value: 2048
 - `api_key`: API key for authentication
 - `model_id`: Model identifier to use
 - `primary_monitor`: Monitor number that the model will see for screenshots, for multi-monitor setup
-  - Default value: 1 
+ - Default value: 1 
 - `screen_resolution`: Desktop resolution of selected monitor
-  - Default value: {'x':1920,'y':1080}
+ - Default value: {'x':1920,'y':1080}
 - `image_tokens`: Token estimate for image encoding
-  - Default value: 1032
+ - Default value: 1032
 - `keep_images`: Number of images to keep in history, large values slow processing time
-  - Default value: 999
+ - Default value: 999
 
 **NOTE:**
 
