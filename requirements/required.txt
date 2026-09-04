@@ -1,5 +1,0 @@
-requests==2.34.2
-rich==15.0.0
-mss==10.2.0
-Wikipedia-API==0.15.0
-openai==2.43.0
