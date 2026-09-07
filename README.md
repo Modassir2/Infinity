@@ -157,11 +157,11 @@ The app supports these commands from the CLI:
 
 Infinity uses dynamic tool sets. The main app can switch between:
 
-- `general_tools`
-- `web_search_tools`
-- `desktop_tools`
-- `file_management_tools`
-- `read_file_tools`
+1. `web_search_tools`
+2. `desktop_tools`
+3. `file_modification_tools`
+4. `read_file_tools`
+5. `coding_tools`
 
 ### Global tools
 
@@ -170,14 +170,14 @@ Available globally:
 - `view_screen`
 - `update_memory`
 
-### Web search tools
+### 1. Web search tools
 
 - `get_weather`
 - `wiki_search`
-- `web_search`
+- `web_search` - Uses searxng backend, you need to have searxng search engine.
 - `fetch_url_content`
 
-### Desktop tools
+### 2. Desktop tools
 
 The desktop toolset supports:
 - `screenshot capture`
@@ -189,9 +189,9 @@ The desktop toolset supports:
 - `waiting`
 - `shortcut search`
 
-### File management tools
+### 3. File modifcation tools
 
-The file management toolset supports:
+The file modification toolset supports:
 - `set_base_dir`
 - `make_dir`
 - `delete_dir`
@@ -206,7 +206,7 @@ The file management toolset supports:
 - `rename_file`
 - `delete_file`
 
-### Read-file tools
+### 4. Read-file tools
 
 The specialized read toolset supports:
 - `read_pdf`
@@ -216,6 +216,25 @@ The specialized read toolset supports:
 - `find_in_file`
 - `read_json`
 - `read_docx`
+
+### 5. Coding tools
+
+The coding toolset supports:
+- `set_base_dir`
+- `create_directory`
+- `create_file`
+- `list_dir-read_file`
+- `file_search`
+- `grep_search`
+- `replace_string_in_file`
+- `multi_replace_string_in_file`
+- `create_new_jupyter_notebook`
+- `get_errors`
+- `create_cell`
+- `list_cells`
+- `read_cell`
+- `delete_cell`
+- `patch_cell`
 
 ## Project structure
 
@@ -320,6 +339,7 @@ This is especially useful when:
 - use `/clear` or `/del` to reset conversation state
 
 ### Web search not working
+- you need to have searxng backend and point the `searxng_url` to the backend on correct port
 - confirm `searxng_url` is configured correctly
 - make sure the SearxNG service is reachable
 - check that the backend can accept search requests
@@ -328,10 +348,10 @@ This is especially useful when:
 
 The app is structured so new tool groups can be added with a few steps:
 
-1. create a tool module in `functions/<your_func>.py`
-2. define the tool schemas in `tools_schema/<your_schema>.json`
-3. add the tool map and instructions in `main.py` in `tool_set_map`
-4. add tool set in `global_tools.json` under `get_tools` function. Set "const" to exact name (<your_schema>) as the json schema file without the file extention
+1. create a tool module in `functions/<your_func>_functions.py` and make a <your_func>_tool_map in the same functions file
+2. define the tool schemas in `tools_schema/<your_schema>_tools.json`
+3. add the tool map and instructions in `main.py` in `tool_set_map` by importing it and appending to `tool_set_map`
+4. add your tool set as const parameter `global_tools.json` under `get_tools` function. Set "const" to exact name (<your_schema>) as the json schema file without the file extention
 5. update requirements.txt/dependencies if needed
 
 This keeps the system modular without needing a large rewrite.
