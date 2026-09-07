@@ -124,7 +124,7 @@ def web_search(query:str,n_result:int=5):
 
     return {"role":"tool","name":"web_search","content":str(filtered_results)}
 
-def fetch_url_content(url: str):
+def fetch_url_content(url: str,max_characters:int=config.max_chrs):
     retry = config.n_retry
     headers = {
         "User-Agent": (
@@ -148,8 +148,8 @@ def fetch_url_content(url: str):
 
             #Clean excessive whitespace,tabs,duplicate newlines
             cleaned_text = re.sub(r"\s+", " ", text).strip()
-            if len(cleaned_text)>config.max_chrs:
-                cleaned_text = cleaned_text[:config.max_chrs]
+            if len(cleaned_text)>max_characters:
+                cleaned_text = cleaned_text[:max_characters] + '...'
             return {"role":"tool","name":"fetch_url_content","content":f"{cleaned_text}"}
 
         except RequestsError as e:

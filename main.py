@@ -15,14 +15,16 @@ import mss
 #TOOLSETS and FUNCTIONS
 from functions.web_search_tools import web_search_tool_map,web_search_instructions
 from functions.desktop_functions import desktop_tool_map,desktop_tools_instructions
-from functions.file_managment_functions import file_management_tool_map,file_management_instructions
+from functions.file_modification_functions import file_modification_tool_map,file_modification_instructions
 from functions.read_file_functions import read_file_tool_map,read_file_instructions
+from functions.coding_functions import coding_tool_map,coding_instructions
 
 tool_set_map={
     "web_search_tools": {"tool_map":web_search_tool_map,"instructions":web_search_instructions},
     "desktop_tools": {"tool_map":desktop_tool_map,"instructions":desktop_tools_instructions},
-    "file_management_tools": {"tool_map":file_management_tool_map,"instructions":file_management_instructions},
+    "file_modification_tools": {"tool_map":file_modification_tool_map,"instructions":file_modification_instructions},
     "read_file_tools": {"tool_map":read_file_tool_map,"instructions":read_file_instructions},
+    "coding_tools": {"tool_map":coding_tool_map,"instructions":coding_instructions},
 }
 
 
@@ -52,53 +54,46 @@ def view_screen(mon:int=config.mon):
         ]
     }
 
-def update_memory(instruction:str=None):
-        old_mem = utils.load_memory() if utils.load_memory() else "None"
-        chat_log = ""
-        for i in history.history:
-            if i["role"] == "user":
-                chat_log += "\n[user:]\n"
-                if type(i["content"]) == list:
-                    content = ""
-                    for j in i["content"]:
-                        if j.get("text"):
-                            content += j.get("text")+'\n'
-                    content = content.strip()
-                else:
-                    content = i["content"]
-                chat_log += content
-            elif i["role"] == "assistant" and i["content"] != None:
-                chat_log += "\n[agent:]\n"
-                chat_log += i["content"]
-            elif i["role"] == "tool":
-                chat_log += "\n[tool:]\n"
-                if type(i["content"]) == list:
-                    content = ""
-                    for j in i["content"]:
-                        if j.get("text"):
-                            content += j.get("text")+'\n'
-                    content = content.strip()
-                else:
-                    content = i["content"]
-                chat_log += content
-            else:
-                continue
-        message = [
-            {"role":"system","content":utils.compression_prompt},
-            {"role":"user","content":f"Old Profile:\n```markdown\n{old_mem}\n```\n\nChat Log:\n{chat_log}\n\nPriority Instruction: {instruction}"}
-        ]
-        response = config.client.chat.completions.create(
-            messages=message,
-            model=config.model,
-            temperature=0,
-            extra_body={"chat_template_kwargs": {"enable_thinking": False}}
-        )
-        #utils.log(response.choices[0].message.content)
-        with open(r".\data\memory.md",'w',encoding='utf-8') as file:
-            file.write(response.choices[0].message.content)
-        history.update_sysmem_dt()
+def add_memory(memory:str):
+    current_memory = utils.read_memory() or ""
+    if current_memory and not current_memory.endswith("\n"):
+        current_memory += "\n"
+    utils.write_memory(current_memory + memory)
+    return {
+        "role":"tool",
+        "name":"add_memory",
+        "content":"Memory added successfully."
+    }
 
-        return {"role":"tool","name":"update_memory","content":"Memory has been updated automatically."}
+def remove_memory(memory:str):
+    current_memory = utils.read_memory() or ""
+    if memory not in current_memory:
+        return {
+            "role":"tool",
+            "name":"remove_memory",
+            "content":"Memory block was not found; memory was not changed."
+        }
+    utils.write_memory(current_memory.replace(memory, "", 1))
+    return {
+        "role":"tool",
+        "name":"remove_memory",
+        "content":"Memory removed successfully."
+    }
+
+def patch_memory(old_value:str, new_value:str):
+    current_memory = utils.read_memory() or ""
+    if old_value not in current_memory:
+        return {
+            "role":"tool",
+            "name":"patch_memory",
+            "content":"Old value was not found; memory was not changed."
+        }
+    utils.write_memory(current_memory.replace(old_value, new_value, 1))
+    return {
+        "role":"tool",
+        "name":"patch_memory",
+        "content":"Memory patched successfully."
+    }
 
 def get_tools(tool_set:str):
     tool_set=tool_set.lower()
@@ -132,7 +127,9 @@ def get_tools(tool_set:str):
 global_tool_map = {
     "get_tools":get_tools,
     "view_screen":view_screen,
-    "update_memory":update_memory
+    "add_memory":add_memory,
+    "remove_memory":remove_memory,
+    "patch_memory":patch_memory
 }
 tools.tool_map=global_tool_map
 
@@ -142,6 +139,8 @@ def generate():
     output = ""
     tool_dict = {}
     history.update_sysmem_dt()
+    history.optimize_history()
+    history.truncate_history(console=console)
     with Live(console=console,auto_refresh=False,vertical_overflow="ellipsis") as live:
         text=Text("Processing...",style="yellow")
         live.update(text,refresh=True)
@@ -291,7 +290,7 @@ if __name__=="__main__":
                     history.print_tokens(console=console)
                     continue
                 elif command == '/memory':
-                    console.print(Markdown(f"**Model Memory:**\n{utils.load_memory()}"),style=response_color)
+                    console.print(Markdown(f"**Model Memory:**\n{utils.read_memory()}"),style=response_color)
                     continue
                 elif command == '/general_tools':
                     if tools.tool_set == "general_tools":
@@ -326,8 +325,6 @@ if __name__=="__main__":
                 console.print()
 
                 console.print("[Infinity:]",style=assistant_color)
-                history.optimize_history()
-                history.truncate_history(console=console)
                 utils.save_history(history.history)
 
             tool_dict = generate() #Main func call is here............
@@ -364,9 +361,14 @@ if __name__=="__main__":
                             output = output.strip()
                         else:
                             output = tool_response["content"].strip()
-                        output = output[:500]+'...' if len(output)>500 else output
-                        output = output.strip()
-                        console.print(f"[TOOL_OUTPUT:] {output if output else None}",style=tool_color,markup=False)
+                        output = output.strip().splitlines()
+                        if len(output)>1:
+                            print_output = output[0][:100].strip() +'...'
+                        elif len(output[0])>100:
+                            print_output = output[0][:100]+'...'
+                        else:
+                            print_output = output[0] if output else None
+                        console.print(f"[TOOL_OUTPUT:] {print_output}",style=tool_color,markup=False)
 
             else:
                 history.user_turn = True

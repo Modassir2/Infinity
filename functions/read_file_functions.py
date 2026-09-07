@@ -1,3 +1,5 @@
+from classes import config
+
 import base64
 import json
 import os
@@ -16,15 +18,6 @@ read_file_instructions = """**START BY CHOOSING THE RIGHT READER FOR THE FILE TY
 - Prefer the most specific tool for the file type instead of reading raw files broadly.
 - Keep outputs concise, relevant, and easy for the main assistant to reason over.
 - Always validate the path before reading and report clear failure messages when a file is missing, unreadable, or unsupported.
-
-## Tool Selection Rules
-- Use `read_plain_text` for .txt, .md, .log, .json, .yaml, .yml, and general text files.
-- Use `read_csv` for CSV files and convert them into a compact markdown table.
-- Use `read_pdf` for PDFs and specify `page` when the target page is known.
-- Use `read_image` for .png, .jpg, and .jpeg files.
-- Use `find_in_file` first when you need to locate a keyword or specific section inside a large file.
-- Use `read_docx` for DOCX documents.
-- Use `read_json` for structured JSON content that must be interpreted as data rather than plain text.
 
 ## Best Practices
 - Read narrow ranges whenever possible using `start_line` and `end_line`.
@@ -67,7 +60,7 @@ def _validate_file(path: str):
     return True, resolved_path
 
 
-def _normalize_text(value, limit: int = 20000):
+def _normalize_text(value, limit: int = config.max_chrs):
     if value is None:
         return ""
     if isinstance(value, (dict, list)):
@@ -144,6 +137,27 @@ def read_image(path: str):
         return {"role": "tool", "name": "read_image", "content": [{"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}]}
     except Exception as exc:
         return {"role": "tool", "name": "read_image", "content": [{"type": "text", "text": f"Failed to read image: {exc}"}]}
+
+
+def list_dir(path:str):
+    if not os.path.exists(path):
+        return {"role":"tool","name":"list_dir","content":f"Path does not exist: {path}"}
+    try:
+        l=os.listdir(path)
+        return {"role":"tool","name":"list_dir","content":f"Items in Directory: {l}"}
+    except Exception as e:
+        return {"role":"tool","name":"list_dir","content":f"An error occured: {e}"}
+
+
+def search_dir(path:str, pattern:str=None):
+    if not os.path.exists(path):
+        return {"role":"tool","name":"search_dir","content":f"Path does not exist: {path}"}
+    matches=[]
+    for root, dirs, files in os.walk(path):
+        for name in dirs + files:
+            if pattern is None or pattern.lower() in name.lower():
+                matches.append(os.path.relpath(os.path.join(root, name), path))
+    return {"role":"tool","name":"search_dir","content":f"Search results: {matches}"}
 
 
 def read_plain_text(path: str, start_line: int = 1, end_line: int = 100):
@@ -261,6 +275,8 @@ read_file_tool_map = {
     "find_in_file": find_in_file,
     "read_json": read_json,
     "read_docx": read_docx,
+    "list_dir":list_dir,
+    "search_dir":search_dir
 }
 
 

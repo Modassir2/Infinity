@@ -16,15 +16,19 @@
                         },
                         {
                             "const": "desktop_tools",
-                            "description": "Control desktop applications, performs UI actions, clicks, and types."
+                            "description": "Control desktop applications, performs UI actions, clicks, and types to open apps, navigate for user."
                         },
                         {
-                            "const": "file_management_tools",
-                            "description": "Create, modify, delete, read files and directories."
+                            "const": "file_modification_tools",
+                            "description": "Create, write, modify, delete files and directories."
                         },
                         {
                             "const": "read_file_tools",
-                            "description": "Read different types of files- images, pdf, docx, csv, txt, log etc"
+                            "description": "Read different types of files- images, pdf, docx, csv, txt, log etc."
+                        },
+                        {
+                            "const": "coding_tools",
+                            "description": "Understand, edit, search, or diagnose source code and Jupyter notebook cells. Not for ordinary file or directory housekeeping."
                         }
                     ],
                     "description":"Tool set to switch to."
@@ -48,13 +52,43 @@
     {
         "type":"function",
         "function":{
-            "name":"update_memory",
-            "description":"Update memory automatically. Use when user says to remember, forget or memorise something.",
+            "name":"add_memory",
+            "description":"Append a new memory block to memory.",
             "parameters":{
                 "type":"object",
                 "properties":{
-                    "instruction":{"type":"string","description":"Special Instruction for updating memory. eg- Remove 'xyy' from memory as user asked.","default":null}
-                }
+                    "memory":{"type":"string","description":"The Markdown memory block to append."}
+                },
+                "required":["memory"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"remove_memory",
+            "description":"Remove one exact memory block from the user's memory file.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "memory":{"type":"string","description":"The exact Markdown memory block to remove. Case sensitive"}
+                },
+                "required":["memory"]
+            }
+        }
+    },
+    {
+        "type":"function",
+        "function":{
+            "name":"patch_memory",
+            "description":"Replace the first exact old value in the user's memory with a new value.",
+            "parameters":{
+                "type":"object",
+                "properties":{
+                    "old_value":{"type":"string","description":"The exact value in memory to replace."},
+                    "new_value":{"type":"string","description":"The replacement value."}
+                },
+                "required":["old_value","new_value"]
             }
         }
     }

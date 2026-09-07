@@ -9,5 +9,5 @@
     "keep_images": 1,
     "searxng_url": "http://127.0.0.1:8005",
     "n_retry": 3,
-    "max_characters": 9000
+    "max_characters": 10000
 }

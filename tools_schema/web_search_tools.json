@@ -51,7 +51,8 @@
             "parameters":{
                 "type":"object",
                 "properties":{
-                    "url":{"type":"string","description":"Full website url to fetch content from."}
+                    "url":{"type":"string","description":"Full website url to fetch content from."},
+                    "max_characters":{"type":"integer","description":"Maximum number of characters to fetch.","default":10000}
                 },
                 "required":["url"]
             }

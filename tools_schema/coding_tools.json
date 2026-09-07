@@ -1,0 +1,263 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "set_base_dir",
+            "description": "Set the base directory used to resolve all relative coding tool paths.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Path to the base directory."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_directory",
+            "description": "Create a directory relative to the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "dirPath": {"type": "string", "description": "Relative path of the directory to create."}
+                },
+                "required": ["dirPath"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_file",
+            "description": "Create or overwrite a source-code file as part of a coding task.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filePath": {"type": "string", "description": "Relative path of the file to create."},
+                    "content": {"type": "string", "description": "Content to write into the file."}
+                },
+                "required": ["filePath", "content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_dir",
+            "description": "List the entries in a directory relative to the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the directory to list."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read source code needed for a coding task.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filePath": {"type": "string", "description": "Relative path of the file to read."},
+                    "startLine": {"type": "integer", "description": "Starting line number, inclusive."},
+                    "endLine": {"type": ["integer", "null"], "description": "Ending line number, inclusive. Use null to read through the end of the file."}
+                },
+                "required": ["filePath", "startLine", "endLine"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "file_search",
+            "description": "Find files matching a glob pattern relative to the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Glob pattern to search for."},
+                    "maxResults": {"type": ["integer", "null"], "description": "Maximum number of results to return."}
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "grep_search",
+            "description": "Search files for a text query or regular expression.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Text or regular expression to search for."},
+                    "isRegexp": {"type": "boolean", "description": "Whether query should be interpreted as a regular expression."},
+                    "includePattern": {"type": ["string", "null"], "description": "Optional relative glob pattern limiting searched files."},
+                    "maxResults": {"type": ["integer", "null"], "description": "Maximum number of matching files to return."},
+                    "includeIgnoredFiles": {"type": "boolean", "description": "Whether ignored files may be included in the search."}
+                },
+                "required": ["query", "isRegexp"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "replace_string_in_file",
+            "description": "Replace source-code text as part of a coding task.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filePath": {"type": "string", "description": "Relative path of the file to edit."},
+                    "oldString": {"type": "string", "description": "Text to replace."},
+                    "newString": {"type": "string", "description": "Replacement text."}
+                },
+                "required": ["filePath", "oldString", "newString"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "multi_replace_string_in_file",
+            "description": "Apply multiple text replacements across files relative to the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "explanation": {"type": "string", "description": "Short explanation of the requested replacements."},
+                    "replacements": {
+                        "type": "array",
+                        "description": "Replacement operations to apply.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "filePath": {"type": "string", "description": "Relative path of the file to edit."},
+                                "oldString": {"type": "string", "description": "Text to replace."},
+                                "newString": {"type": "string", "description": "Replacement text."}
+                            },
+                            "required": ["filePath", "oldString", "newString"]
+                        }
+                    }
+                },
+                "required": ["explanation", "replacements"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_new_jupyter_notebook",
+            "description": "Create a new notebook file relative to the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the notebook file to create."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_errors",
+            "description": "Compile a Python file and return syntax or compilation errors.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path to the Python file to check."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_cell",
+            "description": "Append a cell to a notebook relative to the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "notebook_path": {"type": "string", "description": "Relative path of the notebook."},
+                    "cell_id": {"type": ["string", "null"], "description": "Optional cell ID; one is generated when omitted."},
+                    "cell_type": {"type": "string", "description": "Notebook cell type, such as code or markdown.", "default": "code"},
+                    "source": {"type": "string", "description": "Cell source text.", "default": ""},
+                    "metadata": {"type": ["object", "null"], "description": "Optional cell metadata."},
+                    "execution_count": {"type": ["integer", "null"], "description": "Execution count for code cells."},
+                    "outputs": {"type": ["array", "null"], "description": "Outputs for a code cell."}
+                },
+                "required": ["notebook_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_cells",
+            "description": "List notebook cell indexes, IDs, types, and short source previews.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "notebook_path": {"type": "string", "description": "Relative path of the notebook."},
+                    "limit": {"type": "integer", "description": "Maximum number of first source lines to return per cell. Lines are still capped at 500 characters.", "default": 50}
+                },
+                "required": ["notebook_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_cell",
+            "description": "Read a notebook cell by ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "notebook_path": {"type": "string", "description": "Relative path of the notebook."},
+                    "cell_id": {"type": "string", "description": "ID of the cell to read."},
+                    "start_line": {"type": "integer", "description": "First source line to include, starting at 1.", "default": 1},
+                    "end_line": {"type": ["integer", "null"], "description": "Last source line to include. Null includes through the end.", "default": null}
+                },
+                "required": ["notebook_path", "cell_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_cell",
+            "description": "Delete a notebook cell by ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "notebook_path": {"type": "string", "description": "Relative path of the notebook."},
+                    "cell_id": {"type": "string", "description": "ID of the cell to delete."}
+                },
+                "required": ["notebook_path", "cell_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "patch_cell",
+            "description": "Replace text within a notebook cell by ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "notebook_path": {"type": "string", "description": "Relative path of the notebook."},
+                    "cell_id": {"type": "string", "description": "ID of the cell to patch."},
+                    "old_line": {"type": "string", "description": "Text to replace in the cell source."},
+                    "new_line": {"type": "string", "description": "Replacement text."}
+                },
+                "required": ["notebook_path", "cell_id", "old_line", "new_line"]
+            }
+        }
+    }
+]

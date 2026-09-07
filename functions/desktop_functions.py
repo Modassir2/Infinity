@@ -46,17 +46,15 @@ After the user acknowledges the plan:
 
 #HELPER FUNCTIONS
 def get_screenshot(mon:int=mon):
-    with mss.mss() as screen:
+    with mss.MSS() as screen:
         screen.shot(output="monitor-2.png", mon=mon)
     with open('monitor-2.png','rb') as img:
         base64img=base64.b64encode(img.read()).decode('utf-8')
     return f"data:image/png;base64,{base64img}"
 
-def annonated_cursor(image_url:str=None,coords:list[int,int]=None):
+def annonated_cursor(coords:list[int,int],image_url:str=None):
     if not image_url:
         image_url = get_screenshot()
-    if not coords:
-        coords = pyautogui.position()
     image_b64=image_url[22::]
     x,y=coords
     #Decode base64 string to OpenCV image
@@ -140,6 +138,7 @@ def l_click(coordinates:list,reason:str,wait:int=3):
         return [{'role':"tool","name":"left_click","content":f"Invalid argument passed: {e}"}]
     x_pixel=int((x/1000)*w)
     y_pixel=int((y/1000)*h)
+    feedback_img = annonated_cursor(coords=[x_pixel,y_pixel])
     try:
         pyautogui.click(x_pixel, y_pixel)
     except pyautogui.FailSafeException:
@@ -152,9 +151,9 @@ def l_click(coordinates:list,reason:str,wait:int=3):
     }
     time.sleep(wait)
     #pyautogui.moveTo(0,0)
-    image_url=annonated_cursor(coords=[x_pixel,y_pixel])
+    image_url=get_screenshot()
     utils.log(f"l_click: {x},{y} -> {x_pixel},{y_pixel}")
-    feedback = generate_feedback(img_b64=image_url,action=reason)
+    feedback = generate_feedback(img_b64=feedback_img,action=reason)
     return {
         "role":"tool",
         "name":"left_click",
@@ -174,6 +173,7 @@ def r_click(coordinates:list,reason:str,wait:int=3):
             }]
     x_pixel=int((x/1000)*w)
     y_pixel=int((y/1000)*h)
+    feedback_img = annonated_cursor(coords=[x_pixel,y_pixel])
     try:
         pyautogui.rightClick(x_pixel, y_pixel)
     except pyautogui.FailSafeException:
@@ -186,9 +186,9 @@ def r_click(coordinates:list,reason:str,wait:int=3):
     }
     time.sleep(wait)
     #pyautogui.moveTo(0,0)
-    image_url=annonated_cursor(coords=[x_pixel,y_pixel])
+    image_url=get_screenshot()
     utils.log(f"r_click: {x},{y} -> {x_pixel},{y_pixel}")
-    feedback = generate_feedback(img_b64=image_url,action=reason)
+    feedback = generate_feedback(img_b64=feedback_img,action=reason)
     return {
         "role":"tool",
         "name":"right_click",
@@ -211,9 +211,9 @@ def view_screen():
 
 def type_text(text:str,textbox_coordinates:list,reason:str,press_enter:bool=False,wait:int=2):
     x,y=textbox_coordinates
-    x=(x/1000)*w
-    y=(y/1000)*h
-    pyautogui.click(x,y)
+    x_pixel=int((x/1000)*w)
+    y_pixel=int((y/1000)*h)
+    pyautogui.click(x_pixel,y_pixel)
     time.sleep(0.5)
     #pyautogui.moveTo(0,0)
     pyautogui.write(text)
@@ -221,13 +221,12 @@ def type_text(text:str,textbox_coordinates:list,reason:str,press_enter:bool=Fals
     if press_enter:
         pyautogui.hotkey(['enter'])
     time.sleep(wait)
-    image_url=annonated_cursor(coords=[x,y])
-    feedback = generate_feedback(img_b64=image_url,action=reason)
+    image_url=get_screenshot()
     return {
         "role":"tool",
         "name":"type_text",
         "content":[
-            {"type":"text","text":f"Typed: {text if len(text)<=1001 else text[:1000:]+'...'}. {feedback}"},
+            {"type":"text","text":f"Typed: {text if len(text)<=1001 else text[:1000:]+'...'}."},
             {"type":"image_url","image_url":{"url":image_url}}
         ]
     }

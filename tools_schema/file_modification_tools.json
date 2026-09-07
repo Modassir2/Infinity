@@ -1,0 +1,195 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "make_dir",
+            "description": "Create a directory inside the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the directory to create."},
+                    "exist_ok": {"type": "boolean", "description": "Whether to ignore the error if the directory already exists.", "default": true}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_dir",
+            "description": "Delete a directory from the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the directory to delete."},
+                    "recursive": {"type": "boolean", "description": "Whether to delete the directory and all of its contents.", "default": false}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_dir",
+            "description": "List all items inside a directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the directory to inspect."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "rename_dir",
+            "description": "Rename or move a directory within the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Current relative path of the directory."},
+                    "new_path": {"type": "string", "description": "New relative path for the directory."}
+                },
+                "required": ["path", "new_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "set_base_dir",
+            "description": "Set the root directory used for all file and directory operations.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "abs_path": {"type": "string", "description": "Absolute path that should become the base directory."}
+                },
+                "required": ["abs_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_dir",
+            "description": "Search for files or folders under a directory by a name pattern.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative directory path to search within."},
+                    "pattern": {"type": "string", "description": "Optional substring to match against file or folder names."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_file",
+            "description": "Create a file with optional initial content.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the file to create."},
+                    "content": {"type": "string", "description": "Initial content to write into the file.", "default": ""}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "patch_file",
+            "description": "Replace one chunk of text in an existing file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the file to patch."},
+                    "old_text": {"type": "string", "description": "Text to locate and replace."},
+                    "new_text": {"type": "string", "description": "Replacement text."}
+                },
+                "required": ["path", "old_text", "new_text"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Write or overwrite the contents of a file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the file to write."},
+                    "content": {"type": "string", "description": "Content to write into the file.", "default": ""}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read the full contents of a file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the file to read."},
+                    "start": {"type": "integer", "description": "Starting line, inclusive.", "default": 1},
+                    "end": {"type": "integer", "description": "Ending line, exclusive.", "default": 100}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "rename_file",
+            "description": "Rename or move a file within the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Current relative path of the file."},
+                    "new_path": {"type": "string", "description": "New relative path for the file."}
+                },
+                "required": ["path", "new_path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_metadata",
+            "description": "Read metadata for a file or directory inside the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the file or directory to inspect."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_file",
+            "description": "Delete a file from the configured base directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path of the file to delete."}
+                },
+                "required": ["path"]
+            }
+        }
+    }
+]

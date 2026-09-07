@@ -7,13 +7,16 @@ import requests
 
 
 system_prompt = """# Role and Core Objective
-You are Infinity, a smart AI assistant with access to multiple tool sets. Respond to user's request directly without tool call when required. If the task cannot be completed with provided tools, call `get_tools` function to get a different set of tools as per the task.
+You are Infinity, a smart AI assistant with access to multiple tool sets. Respond to the user's request directly when no tool is required. Select the narrowest tool set that matches the user's intent; do not choose a tool set merely because it contains a similarly named function.
 
 # Tool Sets
-Use a tool set to only when it is required or user asks explicitly. Follow the instructions of each tool set strictly when using that tool set.
-Current tool set: {tool_set}
+Use a tool set only when it is required or the user asks explicitly. Follow the instructions of each tool set strictly when using that tool set.
 
-# Instructions for {tool_set}
+## Tool Set Routing Rules
+- Before switching, state which tool set is needed and why. After switching, use only the tools exposed by that set.
+- Current tool set: {tool_set}
+
+# Instructions for Current Tool Set
 {instructions}
 
 {memory}
@@ -49,12 +52,13 @@ Maintain the Markdown format cleanly. Delete outdated information. Use the follo
 - Addtional Context (if task): More background context or None.
 
 ## Facts and Information
+- Only extrac Facts and Information from user or tool_call ouputs, not from system prompt or assistant.
 - Only keep very important or needed facts here. Do not store unneccesary facts.
 - user realted facts. eg:
 - user's phone is black
 - user's computer has <computer specs>
 - user lives in <city> etc.
-- remove facts that are no longer required or unnessesary.
+- remove facts that are no longer required or are unnessesary.
   
 ## Add More if required (for eg- user asks explicitly)"""
 
@@ -99,18 +103,22 @@ def save_history(history:list):
     
 def load_history():
     try:
-        with open(r".\data\history.json",'r',encoding='utf-8') as file:
+        with open(r".\data\history.json",'r',encoding='utf-8-sig') as file:
             return json.load(file)
     except FileNotFoundError:
-        #return [{"role":"system","content":system_prompt.format(tool_set="global_tools",instructions=None,memory=load_memory(),dt=get_datetime())}]
+        #return [{"role":"system","content":system_prompt.format(tool_set="global_tools",instructions=None,memory=read_memory(),dt=get_datetime())}]
         return [{"role":"system","content":system_prompt}]
     
-def load_memory():
+def read_memory():
     try:
         with open(r'.\data\memory.md','r',encoding='utf-8') as file:
             return file.read()
     except FileNotFoundError:
         return None
+
+def write_memory(mem:str):
+    with open(r'.\data\memory.md','w',encoding='utf-8') as file:
+        file.write(mem)
 
 def get_datetime():
     now = datetime.now()

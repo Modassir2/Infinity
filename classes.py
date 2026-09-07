@@ -20,7 +20,7 @@ class Config:
         self.url = base_url
         self.searx_url = config.get("searxng_url",None)
         self.n_retry = config.get("n_retry",3)
-        self.max_chrs = config.get("max_characters",20000)
+        self.max_chrs = config.get("max_characters",10000)
         self.api_key = config.get("api_key")
         if not self.api_key:
             raise ValueError("'api_key' not provided in config.json")
@@ -54,7 +54,7 @@ class History:
         self.instructions=None
         self.thinking = False
     def update_sysmem_dt(self):
-        self.history[0]["content"] = utils.system_prompt.format(tool_set=tools.tool_set,instructions=self.instructions,memory=utils.load_memory(),dt=f"Current Date and Time: {utils.get_datetime()}")
+        self.history[0]["content"] = utils.system_prompt.format(tool_set=tools.tool_set,instructions=self.instructions,memory=utils.read_memory(),dt=f"Current Date and Time: {utils.get_datetime()}")
     def update(self):
         self.tokens = utils.count_tokens(messages=self.history,model=config.model,url=config.url,tools=tools.tools,api_key=config.api_key)
     def print_tokens(self,console:Console):
@@ -66,7 +66,7 @@ class History:
         if len(self.history)<=1:
             console.print("History is already cleared!",style='yellow')
             return
-        old_mem = utils.load_memory() if utils.load_memory() else "None"
+        old_mem = utils.read_memory() if utils.read_memory() else "None"
         chat_log = ""
         for i in self.history:
             if i["role"] == "user":

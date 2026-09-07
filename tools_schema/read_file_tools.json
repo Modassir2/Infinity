@@ -31,6 +31,35 @@
     {
         "type": "function",
         "function": {
+            "name": "list_dir",
+            "description": "List all items inside a directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path of the directory to inspect."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_dir",
+            "description": "Search for files or folders under a directory by a name pattern.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute directory path to search within."},
+                    "pattern": {"type": "string", "description": "Optional substring to match against file or folder names."}
+                },
+                "required": ["path"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "read_plain_text",
             "description": "Read plain text from a file with optional line-range selection.",
             "parameters": {
